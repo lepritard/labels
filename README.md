@@ -81,3 +81,21 @@ NOTES
   — requires an internet connection on first load for the CDN library
     (you can switch to a local copy of JsBarcode if needed offline)
 
+
+
+VERSION v1.4 NOTES
+──────────────────
+This version adds local font-file support for Century Gothic.
+
+New files:
+  assets/fonts/CenturyGothic.ttf
+  assets/fonts/CenturyGothic-Bold.ttf
+
+These are placeholder files right now.
+Replace them manually with your real Century Gothic font files.
+
+Important:
+• Keep the filenames exactly the same
+• After replacing them, refresh the browser (Ctrl+F5)
+• If the browser still shows the old font, stop/restart the PHP server and refresh again
+
