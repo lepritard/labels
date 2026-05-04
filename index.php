@@ -104,6 +104,10 @@
           <label>Label Copies Per Box</label>
           <input type="number" name="copies" min="1" max="10" value="1">
         </div>
+        <div class="form-group">
+          <label>Starting Sequence # <span style="font-weight:normal;text-transform:none;letter-spacing:0;">(digits 6–9 of serial tag)</span></label>
+          <input type="number" name="seq_start" min="1" max="9999" value="1" placeholder="e.g. 1">
+        </div>
       </div>
 
       <!-- Non-standard boxes — dynamic rows -->
