@@ -160,7 +160,31 @@ The form supports any number of non-standard boxes. A single empty entry row is 
 | v1.8 | 2026-05-03 | Right column (shipment ID/qty) aligned to barcode top; extra spacing before Qty label |
 | v1.9 | 2026-05-03 | Right column shifted right 0.1in; barcode nudge (reverted in v1.10) |
 | v1.10 | 2026-05-03 | Barcode position reverted to v1.8 baseline; part number font size 26pt → 30pt |
-| **v1.11** | **2026-05-04** | **Non-standard labels mirrored (barcode right, qty left); non-standard qty 22pt → 29pt; multiple non-standard boxes supported via dynamic form rows and `nonstd_json` parameter** |
+| v1.11 | 2026-05-04 | Non-standard labels mirrored (barcode right, qty left); non-standard qty 22pt → 29pt; multiple non-standard boxes supported via dynamic form rows and `nonstd_json` parameter |
+| v1.12 | 2026-05-04 | Serial tag barcode added to box label footer (format `YYDDDSSSS`); received date line-height tightened; starting sequence # input added to form |
+| v1.13 | 2026-05-04 | Sequence number tied to box number (not print order); footer anchored to bottom edge; serial number human-readable text 7pt → 15pt |
+| v1.14 | 2026-05-04 | Footer layout fixed: bl-body overflow:hidden prevents content bleeding into footer; footer given fixed height; serial number text centered under barcode |
+| v1.15 | 2026-05-04 | Stray closing div removed from footer HTML; reverted v1.14 overflow/height changes; serial text-align:center kept |
+| v1.16 | 2026-05-04 | Auto-scaling qty text: inline fitText JS shrinks font-size proportionally until qty fits within right column without overflowing |
+| **v1.17** | **2026-05-04** | **Fixed JS syntax error in v1.16: barcode IIFE and fitText IIFE were merged incorrectly, dropping the closing `})()` on the barcode block and killing all JsBarcode calls** |
+
+---
+
+## Serial Tag Format
+
+Each box label now includes a 9-digit serial barcode in the bottom-left, below the received date.
+
+| Digits | Content | Example |
+|--------|---------|--------|
+| 1–2 | 2-digit year from received date | `26` |
+| 3–5 | Day of year (1–366), zero-padded | `124` (May 4) |
+| 6–9 | Sequence number, zero-padded | `0001` |
+
+**Example:** A label for the 1st box received on May 4, 2026 → `261240001`
+
+The **Starting Sequence #** field on the form sets digits 6–9 for the first box in the batch. Each subsequent unique box number increments the sequence by 1. All copies of the same box share the same serial number.
+
+> **Future:** A logging system will track the daily sequence counter automatically so users no longer need to enter a starting number manually.
 
 ---
 
