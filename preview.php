@@ -16,9 +16,12 @@ $type          = $_GET['type'] ?? 'box';
 $customer      = trim($_GET['customer'] ?? '');
 $na_number     = trim($_GET['na_number'] ?? '');
 $received_date = format_date($_GET['received_date'] ?? date('Y-m-d'));
+$raw_date      = $_GET['received_date'] ?? date('Y-m-d');
+$serial_prefix = date('y', strtotime($raw_date)) . sprintf('%03d', date('z', strtotime($raw_date)) + 1);
 $copies        = max(1, intval($_GET['copies'] ?? 1));
 
 $part_number   = trim($_GET['part_number'] ?? '');
+$seq_start     = max(1, intval($_GET['seq_start'] ?? 1));
 $total_boxes   = max(1, intval($_GET['total_boxes'] ?? 1));
 $std_qty       = intval($_GET['std_qty'] ?? 0);
 // Parse multiple non-standard boxes from JSON (v1.11+)
@@ -134,7 +137,10 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   display: flex; justify-content: space-between; align-items: flex-end;
   margin-top: 0.06in; min-height: 0.92in;
 }
-.bl-received { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 12pt; font-weight: 700; line-height: 1.5; }
+.bl-footer-left { display: flex; flex-direction: column; justify-content: flex-end; }
+.bl-received { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 12pt; font-weight: 700; line-height: 1.15; margin-bottom: 0.04in; }
+.bl-serial-barcode { display: block; width: 1.6in; height: 0.35in; }
+.bl-serial-number { font-family: Arial, Helvetica, sans-serif; font-size: 15pt; letter-spacing: 0.05em; line-height: 1; margin-top: 2px; text-align: center; }
 .bl-logo-wrap {
   height: 0.88in; min-height: 0.88in; display: flex; align-items: flex-end; justify-content: flex-end;
   flex: 0 0 auto;
@@ -188,19 +194,23 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 <button class="print-btn" onclick="window.print()">🖨️ Print Labels</button>
 <?php if ($type === 'box'):
   $pages = [];
+  // Sequence is tied to box number: box N gets seq (seq_start + N - 1)
   // Non-standard boxes first (each with its own copy count)
   foreach ($nonstd_entries as $nsbox => $nsdata) {
+    $box_seq = $seq_start + $nsbox - 1;
     for ($c = 0; $c < $nsdata['copies']; $c++)
-      $pages[] = ['box'=>$nsbox,'qty'=>$nsdata['qty'],'nonstd'=>true];
+      $pages[] = ['box'=>$nsbox,'qty'=>$nsdata['qty'],'nonstd'=>true,'seq'=>$box_seq];
   }
   // Standard boxes (skip any in nonstd_entries)
   for ($b = 1; $b <= $total_boxes; $b++) {
     if (isset($nonstd_entries[$b])) continue;
-    for ($c = 0; $c < $copies; $c++) $pages[] = ['box'=>$b,'qty'=>$std_qty,'nonstd'=>false];
+    $box_seq = $seq_start + $b - 1;
+    for ($c = 0; $c < $copies; $c++) $pages[] = ['box'=>$b,'qty'=>$std_qty,'nonstd'=>false,'seq'=>$box_seq];
   }
   $bid = 0;
   foreach ($pages as $pg):
-    $box_num = $pg['box']; $qty = $pg['qty']; $is_nonstd = $pg['nonstd']; $bid++; $bc = 'bc_'.$bid;
+    $box_num = $pg['box']; $qty = $pg['qty']; $is_nonstd = $pg['nonstd']; $box_seq = $pg['seq']; $bid++; $bc = 'bc_'.$bid;
+    $serial = $serial_prefix . sprintf('%04d', $box_seq); $sbc = 'sbc_'.$bid;
 ?>
 <div class="label-page"><div class="box-label">
   <div class="bl-header"><div><span class="bl-customer-label">Customer:</span><span class="bl-customer"> <?php echo h($customer); ?></span></div></div>
@@ -215,19 +225,24 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="bl-box-counter">Box <strong><?php echo $box_num; ?></strong> of <strong><?php echo $total_boxes; ?></strong></div>
       <div class="bl-qty-label">Qty:</div>
       <?php if ($is_nonstd): ?>
-        <div class="bl-qty-line"><span class="bl-qty-arrow nonstd-size">&#9668;</span><span class="bl-qty-num nonstd-size"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow nonstd-size">&#9658;</span><span class="bl-qty-pcs nonstd-size"> pcs</span></div>
+        <div class="bl-qty-line" data-fittext data-fittext-max="29"><span class="bl-qty-arrow nonstd-size">&#9668;</span><span class="bl-qty-num nonstd-size"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow nonstd-size">&#9658;</span><span class="bl-qty-pcs nonstd-size"> pcs</span></div>
       <?php else: ?>
-        <div class="bl-qty-line"><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-pcs"> pcs</span></div>
+        <div class="bl-qty-line" data-fittext data-fittext-max="22"><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-pcs"> pcs</span></div>
       <?php endif; ?>
     </div>
   </div>
   <div class="bl-footer">
-    <div class="bl-received">Received:<br><?php echo h($received_date); ?></div>
+    <div class="bl-footer-left">
+      <div class="bl-received">Received:<br><?php echo h($received_date); ?></div>
+      <svg id="<?php echo $sbc; ?>" class="bl-serial-barcode"></svg>
+      <div class="bl-serial-number"><?php echo h($serial); ?></div>
+    </div>
     <?php if ($logo_data): ?><div class="bl-logo-wrap"><img src="<?php echo $logo_data; ?>" class="bl-logo" alt="Lake Forest Industries"></div><?php endif; ?>
   </div>
 </div></div>
 <script>
-(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}})();
+(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}try{JsBarcode('#<?php echo $sbc; ?>', <?php echo json_encode($serial); ?>, {format:'CODE128', width:1.2, height:28, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $sbc; ?>').style.display='none';}})();
+(function(){var els=document.querySelectorAll('[data-fittext]');els.forEach(function(el){var max=parseFloat(el.getAttribute('data-fittext-max'))||22;var spans=el.querySelectorAll('span');var fs=max;while(fs>8&&el.scrollWidth>el.clientWidth+1){fs-=0.5;spans.forEach(function(sp){sp.style.fontSize=fs+'pt';});}});})();
 </script>
 <?php endforeach; elseif ($type === 'pallet'):
   $pid = 0;
