@@ -21,9 +21,26 @@ $copies        = max(1, intval($_GET['copies'] ?? 1));
 $part_number   = trim($_GET['part_number'] ?? '');
 $total_boxes   = max(1, intval($_GET['total_boxes'] ?? 1));
 $std_qty       = intval($_GET['std_qty'] ?? 0);
+// Parse multiple non-standard boxes from JSON (v1.11+)
+$nonstd_entries = [];
+if (!empty($_GET['nonstd_json'])) {
+  $decoded = json_decode($_GET['nonstd_json'], true);
+  if (is_array($decoded)) {
+    foreach ($decoded as $entry) {
+      $bn = intval($entry['box'] ?? 0);
+      $bq = intval($entry['qty'] ?? 0);
+      $bcp = max(1, intval($entry['copies'] ?? 5));
+      if ($bn > 0 && $bq > 0) $nonstd_entries[$bn] = ['qty' => $bq, 'copies' => $bcp];
+    }
+  }
+}
+// Legacy single-box fallback (backwards compat)
 $nonstd_box    = intval($_GET['nonstd_box_num'] ?? 0);
 $nonstd_qty    = intval($_GET['nonstd_qty'] ?? 0);
 $nonstd_copies = max(1, intval($_GET['nonstd_copies'] ?? 5));
+if ($nonstd_box > 0 && $nonstd_qty > 0 && !isset($nonstd_entries[$nonstd_box])) {
+  $nonstd_entries[$nonstd_box] = ['qty' => $nonstd_qty, 'copies' => $nonstd_copies];
+}
 
 $mixed          = isset($_GET['mixed']) && $_GET['mixed'] == '1';
 $pallet_num     = intval($_GET['pallet_num'] ?? 1);
@@ -98,26 +115,26 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   display: flex; flex-direction: column;
 }
 .bl-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.1in; }
-.bl-customer-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; margin-right: 0.04in; }
-.bl-customer { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 0.22in; font-weight: 700; vertical-align: baseline; }
+.bl-customer-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 14pt; margin-right: 4px; }
+.bl-customer { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 21pt; font-weight: 700; vertical-align: baseline; }
 .bl-body { display: flex; flex-direction: row; flex: 1; gap: 0.14in; min-height: 0; }
 .bl-left { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-.bl-pn-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; margin-bottom: 0.04in; }
-.bl-barcode { display: block; width: 100%; height: 0.7in; margin-bottom: 0.03in; }
-.bl-part-number { font-family: Arial, Helvetica, sans-serif; font-size: 0.26in; font-weight: 400; letter-spacing: 0.04em; line-height: 1; text-align: center; }
-.bl-right { display: flex; flex-direction: column; justify-content: flex-start; gap: 0.04in; min-width: 1.45in; max-width: 1.6in; }
-.bl-na-right { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; font-weight: 400; line-height: 1.1; }
-.bl-box-counter { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 0.13in; font-weight: 400; line-height: 1.3; }
-.bl-box-counter strong { font-size: 0.15in; font-weight: 700; }
-.bl-qty-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; margin-top: 0.04in; }
+.bl-pn-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 14pt; margin-bottom: 4px; }
+.bl-barcode { display: block; width: 100%; height: 1.25in; margin-bottom: 0.03in; }
+.bl-part-number { font-family: Arial, Helvetica, sans-serif; font-size: 30pt; font-weight: 400; letter-spacing: 0.04em; line-height: 1; text-align: center; }
+.bl-right { display: flex; flex-direction: column; justify-content: flex-start; gap: 0.04in; min-width: 1.55in; max-width: 1.7in; padding-top: 0.27in; padding-left: 0.1in; }
+.bl-na-right { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 14pt; font-weight: 400; line-height: 1.1; }
+.bl-box-counter { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 12pt; font-weight: 400; line-height: 1.3; }
+.bl-box-counter strong { font-size: 14pt; font-weight: 700; }
+.bl-qty-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 14pt; margin-top: 0.15in; }
 .bl-qty-line { display: flex; align-items: baseline; line-height: 1; }
-.bl-qty-arrow, .bl-qty-num { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 0.23in; font-weight: 700; }
-.bl-qty-pcs { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 0.23in; font-weight: 400; margin-left: 0.03in; }
+.bl-qty-arrow, .bl-qty-num { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 22pt; font-weight: 700; }
+.bl-qty-pcs { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 22pt; font-weight: 400; margin-left: 3px; }
 .bl-footer {
   display: flex; justify-content: space-between; align-items: flex-end;
   margin-top: 0.06in; min-height: 0.92in;
 }
-.bl-received { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 0.13in; font-weight: 700; line-height: 1.5; }
+.bl-received { font-family: 'LFCenturyGothic', 'Century Gothic', 'Gill Sans', 'Trebuchet MS', Arial, sans-serif; font-size: 12pt; font-weight: 700; line-height: 1.5; }
 .bl-logo-wrap {
   height: 0.88in; min-height: 0.88in; display: flex; align-items: flex-end; justify-content: flex-end;
   flex: 0 0 auto;
@@ -125,6 +142,13 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 .bl-logo {
   display: block; height: 0.88in; width: auto; max-width: none; max-height: none; object-fit: contain;
 }
+
+/* Non-standard (mirrored) label */
+.bl-body.nonstd { flex-direction: row-reverse; }
+.bl-body.nonstd .bl-right { padding-left: 0; padding-right: 0.1in; }
+.bl-qty-num.nonstd-size { font-size: 29pt; }
+.bl-qty-arrow.nonstd-size { font-size: 29pt; }
+.bl-qty-pcs.nonstd-size { font-size: 29pt; }
 
 .pallet-label {
   width: 12in; height: 4in; padding: 0.15in 0.2in 0.12in;
@@ -137,7 +161,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 .pl-body { display: flex; flex-direction: row; flex: 1; min-height: 0; gap: 0.18in; }
 .pl-left, .pl-part-col { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .pl-pallet-row, .pl-pn-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; margin-bottom: 0.04in; }
-.pl-barcode { display: block; width: 100%; height: 0.75in; margin-bottom: 0.04in; }
+.pl-barcode { display: block; width: 100%; height: 1.25in; margin-bottom: 0.04in; }
 .pl-part-number { font-family: Arial, Helvetica, sans-serif; font-size: 0.32in; font-weight: 400; letter-spacing: 0.03em; line-height: 1; }
 .pl-right { display: flex; flex-direction: column; justify-content: center; gap: 0.04in; min-width: 2.2in; max-width: 2.8in; }
 .pl-qty-label { font-family: Impact, 'Arial Narrow', Arial, sans-serif; font-size: 0.17in; }
@@ -164,11 +188,14 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 <button class="print-btn" onclick="window.print()">🖨️ Print Labels</button>
 <?php if ($type === 'box'):
   $pages = [];
-  if ($nonstd_box > 0 && $nonstd_qty > 0) {
-    for ($c = 0; $c < $nonstd_copies; $c++) $pages[] = ['box'=>$nonstd_box,'qty'=>$nonstd_qty,'nonstd'=>true];
+  // Non-standard boxes first (each with its own copy count)
+  foreach ($nonstd_entries as $nsbox => $nsdata) {
+    for ($c = 0; $c < $nsdata['copies']; $c++)
+      $pages[] = ['box'=>$nsbox,'qty'=>$nsdata['qty'],'nonstd'=>true];
   }
+  // Standard boxes (skip any in nonstd_entries)
   for ($b = 1; $b <= $total_boxes; $b++) {
-    if ($b === $nonstd_box) continue;
+    if (isset($nonstd_entries[$b])) continue;
     for ($c = 0; $c < $copies; $c++) $pages[] = ['box'=>$b,'qty'=>$std_qty,'nonstd'=>false];
   }
   $bid = 0;
@@ -177,7 +204,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 ?>
 <div class="label-page"><div class="box-label">
   <div class="bl-header"><div><span class="bl-customer-label">Customer:</span><span class="bl-customer"> <?php echo h($customer); ?></span></div></div>
-  <div class="bl-body">
+  <div class="bl-body<?php echo $is_nonstd ? ' nonstd' : ''; ?>">
     <div class="bl-left">
       <div class="bl-pn-label">Part Number:</div>
       <svg id="<?php echo $bc; ?>" class="bl-barcode"></svg>
@@ -188,7 +215,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="bl-box-counter">Box <strong><?php echo $box_num; ?></strong> of <strong><?php echo $total_boxes; ?></strong></div>
       <div class="bl-qty-label">Qty:</div>
       <?php if ($is_nonstd): ?>
-        <div class="bl-qty-line"><span class="bl-qty-arrow">&#9668;</span><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow">&#9658;</span><span class="bl-qty-pcs"> pcs</span></div>
+        <div class="bl-qty-line"><span class="bl-qty-arrow nonstd-size">&#9668;</span><span class="bl-qty-num nonstd-size"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow nonstd-size">&#9658;</span><span class="bl-qty-pcs nonstd-size"> pcs</span></div>
       <?php else: ?>
         <div class="bl-qty-line"><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-pcs"> pcs</span></div>
       <?php endif; ?>
@@ -200,7 +227,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   </div>
 </div></div>
 <script>
-(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:68, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}})();
+(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}})();
 </script>
 <?php endforeach; elseif ($type === 'pallet'):
   $pid = 0;
@@ -249,8 +276,8 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 </div></div>
 <script>
 (function(){
-  <?php if ($part_number): ?>try{JsBarcode('#<?php echo $bc1; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:72, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc1; ?>').style.display='none';}<?php endif; ?>
-  <?php if ($mixed && $part_number_2): ?>try{JsBarcode('#<?php echo $bc2; ?>', <?php echo json_encode($part_number_2); ?>, {format:'CODE128', width:2.4, height:72, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc2; ?>').style.display='none';}<?php endif; ?>
+  <?php if ($part_number): ?>try{JsBarcode('#<?php echo $bc1; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc1; ?>').style.display='none';}<?php endif; ?>
+  <?php if ($mixed && $part_number_2): ?>try{JsBarcode('#<?php echo $bc2; ?>', <?php echo json_encode($part_number_2); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc2; ?>').style.display='none';}<?php endif; ?>
 })();
 </script>
 <?php endfor; endif; ?>
