@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Warehouse Label Generator
-// index.php v1.11
+// index.php v1.29
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -64,6 +64,7 @@
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('boxes')">📦 Box Labels</button>
     <button class="tab-btn" onclick="switchTab('pallet')">🏗️ Pallet Labels</button>
+    <a class="tab-btn" href="review.php" style="text-decoration:none;">📋 Upload Packing Slip</a>
   </div>
 
   <!-- ===================== BOX LABELS TAB ===================== -->
@@ -151,7 +152,7 @@
         </div>
         <div class="form-group">
           <label>Label Copies (sides of pallet)</label>
-          <input type="number" name="copies" min="1" max="10" value="5">
+          <input type="number" name="copies" min="1" max="10" value="4">
         </div>
       </div>
 
