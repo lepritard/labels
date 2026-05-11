@@ -58,6 +58,10 @@ $total_pallets_2  = intval($_GET['total_pallets_2'] ?? 1);
 $pallet_qty_2     = intval($_GET['pallet_qty_2'] ?? 0);
 $pallet_boxes_2   = intval($_GET['pallet_boxes_2'] ?? 0);
 $pallet_box_qty_2 = intval($_GET['pallet_box_qty_2'] ?? 0);
+$unit_label = trim($_GET['unit_label'] ?? '');   // 'WOODEN CASE' or empty (= normal pallet)
+$revision      = trim($_GET['revision']   ?? '');   // revision letter to display below barcode
+$t013_prepped  = !empty($_GET['t013_prepped']);
+
 
 if ($type === 'pallet') {
   $page_w = '12in'; $page_h = '4in';
@@ -219,6 +223,12 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="bl-pn-label">Part Number:</div>
       <svg id="<?php echo $bc; ?>" class="bl-barcode"></svg>
       <div class="bl-part-number"><?php echo h($part_number); ?></div>
+    <?php if ($revision || $t013_prepped): ?>
+      <div style="font-family:Arial,sans-serif;font-size:14pt;color:#555;text-align:center;margin-top:2px;letter-spacing:0.04em;">
+        <?php if ($revision): ?>Rev. <?php echo h($revision); ?><?php endif; ?>
+        <?php if ($t013_prepped): ?><span style="margin-left:<?php echo $revision ? '12px' : '0'; ?>;font-size:14pt;color:#000;">(Prepped for T013)</span><?php endif; ?>
+      </div>
+    <?php endif; ?>
     </div>
     <div class="bl-right">
       <div class="bl-na-right"><?php echo h($na_number); ?></div>
@@ -260,7 +270,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="pl-pallet-row">Pallet <?php echo $pallet_num; ?> of <?php echo $total_pallets; ?> for Part Number:</div>
       <svg id="<?php echo $bc1; ?>" class="pl-barcode"></svg>
       <div class="pl-part-number"><?php echo h($part_number); ?></div>
-      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs</span></div>
+      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
       <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> pcs)</div><?php endif; ?>
     </div>
     <div class="pl-mixed-col"><div class="pl-mixed-stamp">MIXED<br>PALLET</div></div>
@@ -268,7 +278,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="pl-pallet-row">Pallet <?php echo $pallet_num_2; ?> of <?php echo $total_pallets_2; ?> for Part Number:</div>
       <svg id="<?php echo $bc2; ?>" class="pl-barcode"></svg>
       <div class="pl-part-number"><?php echo h($part_number_2); ?></div>
-      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty_2); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs</span></div>
+      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty_2); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
       <?php if ($pallet_boxes_2 && $pallet_box_qty_2): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes_2; ?> boxes of <?php echo $pallet_box_qty_2; ?> pcs)</div><?php endif; ?>
     </div>
   <?php else: ?>
@@ -279,7 +289,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
     </div>
     <div class="pl-right">
       <div class="pl-qty-label">Qty:</div>
-      <div class="pl-qty-line"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs</span></div>
+      <div class="pl-qty-line"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
       <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> pcs)</div><?php endif; ?>
     </div>
   <?php endif; ?>
