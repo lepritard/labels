@@ -28,6 +28,7 @@ A local PHP web application that generates printable box and pallet labels for i
   - [Laravel Herd](https://herd.laravel.com/) (macOS)
   - PHP's built-in server: `php -S 0.0.0.0:8080` from the project root
 - A modern web browser (Chrome, Firefox, Edge, Safari)
+- **Python 3.8+** with `openpyxl` installed (`pip3 install openpyxl`) — required for packing slip parsing
 - Network access from warehouse workstations (if running on a shared machine)
 
 ---
@@ -82,6 +83,9 @@ Navigate to the app URL in any browser on your network. The main form has two ta
 ```
 lf-labels/
 ├── index.php               # Main entry form (UI)
+├── review.php              # Packing slip upload & review UI (v1.29)
+├── parse_slip.php          # PHP → Python parser bridge (v1.29)
+├── parse_packing_slip.py   # Python packing slip parser (v1.29)
 ├── preview.php             # Label renderer (outputs printable HTML)
 ├── README.md               # This file
 └── assets/
@@ -166,7 +170,19 @@ The form supports any number of non-standard boxes. A single empty entry row is 
 | v1.14 | 2026-05-04 | Footer layout fixed: bl-body overflow:hidden prevents content bleeding into footer; footer given fixed height; serial number text centered under barcode |
 | v1.15 | 2026-05-04 | Stray closing div removed from footer HTML; reverted v1.14 overflow/height changes; serial text-align:center kept |
 | v1.16 | 2026-05-04 | Auto-scaling qty text: inline fitText JS shrinks font-size proportionally until qty fits within right column without overflowing |
-| **v1.17** | **2026-05-04** | **Fixed JS syntax error in v1.16: barcode IIFE and fitText IIFE were merged incorrectly, dropping the closing `})()` on the barcode block and killing all JsBarcode calls** |
+| **v1.18** | **2026-05-11** | **Packing slip upload & review UI (`review.php`); PHP→Python parser bridge (`parse_slip.php`); `parse_packing_slip.py` bundled in project root; pallet copies default corrected 5→4; `unit_label` param for wooden case labels; `revision` sub-text below box label barcode** |
+| v1.19 | 2026-05-11 | Fixed `parse_packing_slip.py` hardcoded `Sheet2` worksheet name — now falls back to `worksheets[0]` if `Sheet2` does not exist, supporting packing slips with non-standard sheet names |
+| **v1.20** | **2026-05-11** | **Fixed infinite recursion in `review.php`: `_origRender` was being assigned after `renderResults` was redeclared, causing `renderResults → _origRender → renderResults → …` stack overflow on every parse. Fixed by capturing original function as `_coreRender` before redeclaration** |
+| **v1.21** | **2026-05-11** | **Fixed `parse_slip.php` broken braces caused by editor corruption; added `set_time_limit(120)` and `ini_set('max_execution_time', 120)` to prevent PHP execution timeout on large packing slips** |
+| **v1.22** | **2026-05-11** | **Fixed click event bubbling on drop-zone: moved file input outside drop-zone div, replaced inline `onclick` with JS `addEventListener` + `stopPropagation()`; switched fetch to `r.text()` + safe `JSON.parse()` for clearer error diagnostics** |
+| **v1.23** | **2026-05-11** | **Replaced `fetch()` with `XMLHttpRequest` to work around a Chromium/Edge + XAMPP localhost bug where `fetch()` promise rejects with "Maximum call stack size exceeded" even when the server returns a valid response** |
+| **v1.24** | **2026-05-11** | **Added `try/catch` around `renderResults()` call to surface silent JS errors; added `xhr.onloadend` fallback to guarantee spinner always hides; added `xhr.ontimeout` handler with 90s timeout** |
+| **v1.25** | **2026-05-11** | **Fixed root cause of "Maximum call stack size exceeded": renamed original render function to `renderResultsCore` and data-store function to `renderResultsData`; replaced fragile `const _coreRender` interception pattern with a single clean `renderResults` entry point that calls both directly** |
+| **v1.26** | **2026-05-11** | **Label generation improvements: (1) barcode now encodes `base_part` (strips customer prefix + revision, e.g. `ENC-1726` not `TBC-ENC-1726-E`); (2) Rev. text below barcode increased from 9pt → 14pt; (3) sequence starts at 0001 for first entry and increments continuously across all groups in Print All; (4) `t013_prepped` flag now renders "Prepped for T013" beside revision on the label** |
+| **v1.27** | **2026-05-11** | **Non-std box fixes: parser now detects remainder rows (same base_part, fewer boxes) and flags them `nonstd_remainder` with `nonstd_box_num`; review.php folds them into parent print job via `nonstd_json`; total_boxes now includes remainder count; nonstd rows use arrow-style template in preview.php. T013 label: changed to black, wrapped in parentheses. T013 badge: grey/black for B&W printing.** |
+| **v1.28** | **2026-05-11** | **Non-std box grouping overhaul: nonstd_remainder rows now render as a sub-row under their parent in review.php (shared single Print button). buildPreviewParams generates correct nonstd_json array format `[{box,qty,copies}]` matching preview.php parser. Total boxes column reflects merged std+nonstd count. Removed Print All button. printRow passes fname context to buildPreviewParams for sibling lookup.** |
+| **v1.29** | **2026-05-11** | **review.php: (1) Shipment ID auto-populated from PO number (PO22643→NA-22643); label renamed from "NA Number (Shipment ID)" to "Shipment ID". (2) Part number column shows base_part (e.g. ENC-1726 not TBC-ENC-1726-E). (3) Rows sorted by customer asc then base_part asc; nonstd siblings stay attached; slipData updated to match sorted order.** |
+| v1.17 | **2026-05-04** | **Fixed JS syntax error in v1.16: barcode IIFE and fitText IIFE were merged incorrectly, dropping the closing `})()` on the barcode block and killing all JsBarcode calls** |
 
 ---
 
