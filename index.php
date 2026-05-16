@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Warehouse Label Generator
-// index.php v1.29
+// index.php v1.37
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,6 +48,15 @@
   .mixed-pallet-section .section-title { border-top: none; padding-top: 0; margin-top: 0; color: #1a4a7a; }
   .hidden { display: none !important; }
   @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-grid.cols-3 { grid-template-columns: 1fr 1fr; } }
+  /* version footer */
+  .version-footer {
+    position: fixed; bottom: 0; right: 0;
+    font-size: 10px; color: #bbb;
+    background: rgba(255,255,255,0.75); backdrop-filter: blur(2px);
+    padding: 2px 8px; border-top-left-radius: 4px;
+    pointer-events: none; z-index: 9999; font-family: monospace;
+    line-height: 1.8;
+  }
 </style>
 </head>
 <body>
@@ -62,8 +71,8 @@
 <div class="container">
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('boxes')">📦 Box Labels</button>
-    <button class="tab-btn" onclick="switchTab('pallet')">🏗️ Pallet Labels</button>
+    <button class="tab-btn active" id="tab-btn-boxes" onclick="switchTab('boxes', this)">📦 Box Labels</button>
+    <button class="tab-btn" id="tab-btn-pallet" onclick="switchTab('pallet', this)">🏗️ Pallet Labels</button>
     <a class="tab-btn" href="review.php" style="text-decoration:none;">📋 Upload Packing Slip</a>
   </div>
 
@@ -233,11 +242,18 @@
 
 <script>
 // ── Tab switching ──────────────────────────────────────────────
-function switchTab(name) {
+// Activate tab from URL hash (e.g. index.php#pallet)
+(function() {
+  const hash = location.hash.replace('#', '');
+  if (hash === 'pallet') { switchTab('pallet', document.getElementById('tab-btn-pallet')); }
+})();
+
+function switchTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  const b = btn || event?.currentTarget;
+  if (b) b.classList.add('active');
 }
 
 // ── Mixed pallet toggle ────────────────────────────────────────
@@ -330,5 +346,6 @@ function buildNonstdParams() {
 // Initialize with one empty non-standard row on page load
 addNonstdRow();
 </script>
+  <div class="version-footer">LF Label Generator&nbsp;v1.37 &middot; index</div>
 </body>
 </html>
