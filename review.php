@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Packing Slip Review
-// review.php v1.29
+// review.php v1.37
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -15,8 +15,10 @@ function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
   .app-header { background: #1a1a1a; color: #fff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .app-header h1 { font-size: 18px; font-weight: bold; letter-spacing: 0.02em; }
   .app-header span { font-size: 12px; color: #999; }
-  .app-header a { color: #aaa; font-size: 12px; text-decoration: none; border: 1px solid #555; border-radius: 3px; padding: 4px 10px; transition: background 0.15s; }
-  .app-header a:hover { background: #333; color: #fff; }
+  .tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #000; }
+  .tab-btn { padding: 8px 20px; font-size: 13px; font-weight: bold; cursor: pointer; background: #e8e8e8; border: 1px solid #ccc; border-bottom: none; color: #555; transition: background 0.15s; font-family: Arial, Helvetica, sans-serif; text-decoration: none; display: inline-block; }
+  .tab-btn.active { background: #fff; color: #000; border-color: #000; border-bottom: 2px solid #fff; margin-bottom: -2px; }
+  .tab-btn:hover:not(.active) { background: #d8d8d8; }
   .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
   .card { background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 20px 24px; margin-bottom: 20px; }
   .card h2 { font-size: 15px; font-weight: bold; margin-bottom: 16px; border-bottom: 2px solid #000; padding-bottom: 6px; }
@@ -45,6 +47,7 @@ function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
   .btn-print:hover { background: #145520; }
   .btn-row { display: flex; gap: 10px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
   .note { font-size: 11px; color: #666; font-style: italic; line-height: 1.5; }
+  .serial-range { font-size: 10px; color: #888; background: #f0f0f0; border: 1px solid #ddd; border-radius: 3px; padding: 1px 5px; font-family: monospace; white-space: nowrap; }
 
   /* Spinner */
   .spinner-wrap { display: none; align-items: center; gap: 12px; padding: 20px 0; }
@@ -107,17 +110,32 @@ function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
     table.review-table th, table.review-table td { padding: 6px 7px; }
     .inline-edit { width: 55px; }
   }
+  /* version footer */
+  .version-footer {
+    position: fixed; bottom: 0; right: 0;
+    font-size: 10px; color: #bbb;
+    background: rgba(255,255,255,0.75); backdrop-filter: blur(2px);
+    padding: 2px 8px; border-top-left-radius: 4px;
+    pointer-events: none; z-index: 9999; font-family: monospace;
+    line-height: 1.8;
+  }
 </style>
 </head>
 <body>
 
 <header class="app-header">
   <div>
-    <h1>📋 Packing Slip Review</h1>
+    <h1>LF Label Generator</h1>
     <span>Lake Forest Industries — Warehouse Receiving</span>
   </div>
-  <a href="index.php">← Back to Manual Entry</a>
 </header>
+<div class="container" style="margin-top:16px;margin-bottom:0;padding-bottom:0;">
+  <div class="tabs">
+    <a class="tab-btn" href="index.php#boxes">📦 Box Labels</a>
+    <a class="tab-btn" href="index.php#pallet">🏗️ Pallet Labels</a>
+    <span class="tab-btn active">📋 Upload Packing Slip</span>
+  </div>
+</div>
 
 <div class="container">
 
@@ -306,13 +324,19 @@ function buildSlipBlock(fname, slip) {
   naRow.style.cssText = 'padding:10px 14px;background:#f0f6ff;border:1px solid #ccc;border-top:none;border-bottom:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;';
   // Auto-derive Shipment ID: PO22643 → NA-22643 (from meta.po or filename)
   const rawPo = meta.po || fname;
-  const poNum = (rawPo.match(/PO[_-]?(\\d+)/i) || [])[1] || '';
+  const poNum = (rawPo.match(/PO[_-]?(\d+)/i) || [])[1] || '';
   const autoNa = poNum ? ('NA-' + poNum) : '';
   naRow.innerHTML = `
     <label style="margin:0;font-size:12px;font-weight:bold;">Shipment ID:</label>
     <input class="na-input" type="text" id="na-${sanitize(fname)}"
            value="${autoNa}" placeholder="e.g. NA-22643" style="margin:0;">
-    <span class="note" style="font-style:normal;">This will appear on every label for this packing slip.</span>`;
+    <span class="note" style="font-style:normal;">This will appear on every label for this packing slip.</span>
+    <label style="margin:0 0 0 24px;font-size:12px;font-weight:bold;">Received Date:</label>
+    <input type="date" id="date-${sanitize(fname)}" style="font-size:13px;padding:3px 6px;border:1px solid #ccc;border-radius:3px;" value="${new Date().toLocaleDateString('en-CA')}">
+    <label style="margin:0 0 0 24px;font-size:12px;font-weight:bold;">Starting Serial #:</label>
+    <input type="number" min="1" id="serial-start-${sanitize(fname)}" value="1"
+           style="width:70px;font-size:13px;padding:3px 6px;border:1px solid #ccc;border-radius:3px;"
+           oninput="refreshSerialRanges('${sanitize(fname)}')">`;
   wrap.appendChild(naRow);
 
   // Table
@@ -330,6 +354,7 @@ function buildSlipBlock(fname, slip) {
       <th style="text-align:right;">Pcs / Unit</th>
       <th style="text-align:right;">Labels × Each</th>
       <th style="text-align:right;">Total Labels</th>
+      <th style="text-align:right;font-size:11px;color:#888;">Serials</th>
       <th>Actions</th>
     </tr></thead>
     <tbody id="tbody-${sanitize(fname)}"></tbody>`;
@@ -380,6 +405,7 @@ function buildSlipBlock(fname, slip) {
       tbody.appendChild(row);
     });
     rebuildActions(fname, slip, sortedGroups, totalBoxLabels, totalPalletLabels, totalCaseLabels);
+    refreshSerialRanges(sanitize(fname));
   }, 0);
 
   return wrap;
@@ -454,6 +480,9 @@ function buildRow(g, rowNum, fname) {
       <span class="total-labels${ct === 'pallet' ? ' pallet-count' : ct === 'wooden_case' ? ' case-count' : ''}"
             id="${rowId}-total">${displayTotal}</span>
     </td>
+    <td style="text-align:right;">
+      <span class="serial-range" id="${rowId}-serial"></span>
+    </td>
     <td>
       <button class="btn btn-print btn-sm"
               onclick="printRow('${sanitize(fname)}', ${rowNum - 1})">🖨️ Print</button>
@@ -519,6 +548,7 @@ function recalcRow(safeFname, idx) {
   const units = parseInt(document.getElementById(`${rowId}-units`).value) || 0;
   const total = units * g.labels_per_unit;
   document.getElementById(`${rowId}-total`).textContent = total;
+  refreshSerialRanges(safeFname);
 }
 
 function recalcNonstd(safeFname, parentIdx) {
@@ -551,6 +581,50 @@ function rebuildActions(fname, slip, groups, totalBox, totalPallet, totalCase) {
 }
 
 // ── Print helpers ────────────────────────────────────────────────────────────
+// ── Serial range helpers ─────────────────────────────────────────────────
+// boxCountForGroup: number of PHYSICAL BOXES a group represents.
+//   carton primary       -> num_labels (or live input if edited)
+//   nonstd_remainder     -> 0  (counted by the parent row)
+//   co_packed_secondary  -> 0  (inner labels, same physical carton)
+//   pallet / wooden_case -> 0  (not box serials)
+function boxCountForGroup(g, allGrps, safeFname, rowNum) {
+  if (g.container_type !== 'carton') return 0;
+  if (g.flags?.includes('co_packed_secondary')) return 0;
+  if (g.flags?.includes('nonstd_remainder')) return 0;
+  const myIdx = allGrps.indexOf(g);
+  const ns = (allGrps[myIdx + 1]?.flags?.includes('nonstd_remainder')
+              && allGrps[myIdx + 1]?.base_part === g.base_part)
+             ? allGrps[myIdx + 1] : null;
+  const liveUnits = parseInt(document.getElementById(`row-${safeFname}-${rowNum}-units`)?.value);
+  const units = (!isNaN(liveUnits) && liveUnits > 0) ? liveUnits : g.num_labels;
+  return ns ? (ns.nonstd_box_num || (units + (ns.num_labels || 1))) : units;
+}
+
+// refreshSerialRanges: assigns sequential serial ranges to every row,
+// starting from the per-slip "Starting Serial #" input.
+function refreshSerialRanges(safeFname) {
+  const fname = Object.keys(slipData).find(k => sanitize(k) === safeFname);
+  if (!fname) return;
+  const startEl = document.getElementById('serial-start-' + safeFname);
+  let serial = parseInt(startEl?.value) || 1;
+  const groups = (slipData[fname] || {}).label_groups || [];
+  groups.forEach((g, idx) => {
+    if (g.flags?.includes('nonstd_remainder')) return;
+    const rowNum = idx + 1;
+    const el = document.getElementById(`row-${safeFname}-${rowNum}-serial`);
+    if (!el) return;
+    const count = boxCountForGroup(g, groups, safeFname, rowNum);
+    if (count === 0) {
+      el.textContent = '—'; el.style.opacity = '0.35';
+    } else {
+      const first = serial, last = serial + count - 1;
+      el.style.opacity = '1';
+      el.textContent = first === last ? `#${first}` : `#${first}–${last}`;
+      serial = last + 1;
+    }
+  });
+}
+
 function printRow(safeFname, idx) {
   const fname = Object.keys(slipData).find(k => sanitize(k) === safeFname);
   if (!fname) return;
@@ -563,7 +637,10 @@ function printRow(safeFname, idx) {
   const units = parseInt(document.getElementById(`${rowId}-units`)?.value) || g.num_labels;
   const pcs   = parseInt(document.getElementById(`${rowId}-pcs`)?.value)   || g.pcs_per_box || 0;
 
-  const params = buildPreviewParams(g, meta, naVal, units, pcs, 1, safeFname);
+  const _srEl   = document.getElementById(`row-${safeFname}-${rowNum}-serial`);
+  const _srNums = (_srEl ? _srEl.textContent : '').replace(/[^0-9]/g, ' ').trim().split(/\s+/);
+  const seqStart = (_srNums[0] && _srNums[0] !== '') ? (parseInt(_srNums[0]) || 1) : 1;
+  const params = buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFname);
   window.open('preview.php?' + params, '_blank');
 }
 
@@ -576,7 +653,9 @@ function buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFnameCtx) 
   // Patch allGrps to use resolved key
   const _allGrpsResolved = (slipData[_rFname] || {}).label_groups || [];
   const ct = g.container_type;
-  const today = new Date().toISOString().slice(0, 10);
+  // Read received_date from the per-slip date picker; fall back to today
+  const _dateEl = document.getElementById('date-' + (safeFnameCtx || ''));
+  const today = (_dateEl && _dateEl.value) ? _dateEl.value : new Date().toLocaleDateString('en-CA');
   const p = new URLSearchParams();
   // Use base_part for the barcode (strips customer prefix + revision)
   const barcodePart = g.base_part || g.part_number;
@@ -650,5 +729,6 @@ function renderResults(data) {
   renderResultsCore(data);
 }
 </script>
+  <div class="version-footer">LF Label Generator&nbsp;v1.37 &middot; review</div>
 </body>
 </html>
