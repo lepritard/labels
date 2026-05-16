@@ -83,9 +83,9 @@ Navigate to the app URL in any browser on your network. The main form has two ta
 ```
 lf-labels/
 ├── index.php               # Main entry form (UI)
-├── review.php              # Packing slip upload & review UI (v1.29)
-├── parse_slip.php          # PHP → Python parser bridge (v1.29)
-├── parse_packing_slip.py   # Python packing slip parser (v1.29)
+├── review.php              # Packing slip upload & review UI (v1.37)
+├── parse_slip.php          # PHP → Python parser bridge (v1.37)
+├── parse_packing_slip.py   # Python packing slip parser (v1.37)
 ├── preview.php             # Label renderer (outputs printable HTML)
 ├── README.md               # This file
 └── assets/
@@ -182,6 +182,14 @@ The form supports any number of non-standard boxes. A single empty entry row is 
 | **v1.27** | **2026-05-11** | **Non-std box fixes: parser now detects remainder rows (same base_part, fewer boxes) and flags them `nonstd_remainder` with `nonstd_box_num`; review.php folds them into parent print job via `nonstd_json`; total_boxes now includes remainder count; nonstd rows use arrow-style template in preview.php. T013 label: changed to black, wrapped in parentheses. T013 badge: grey/black for B&W printing.** |
 | **v1.28** | **2026-05-11** | **Non-std box grouping overhaul: nonstd_remainder rows now render as a sub-row under their parent in review.php (shared single Print button). buildPreviewParams generates correct nonstd_json array format `[{box,qty,copies}]` matching preview.php parser. Total boxes column reflects merged std+nonstd count. Removed Print All button. printRow passes fname context to buildPreviewParams for sibling lookup.** |
 | **v1.29** | **2026-05-11** | **review.php: (1) Shipment ID auto-populated from PO number (PO22643→NA-22643); label renamed from "NA Number (Shipment ID)" to "Shipment ID". (2) Part number column shows base_part (e.g. ENC-1726 not TBC-ENC-1726-E). (3) Rows sorted by customer asc then base_part asc; nonstd siblings stay attached; slipData updated to match sorted order.** |
+| **v1.30** | **2026-05-11** | **4 fixes: (1) Shipment ID regex unescaped (\\d→\d) so auto-populate now works. (2) parse_packing_slip.py strips customer prefix from base_part for ALL prefixed parts (APS-B22519-34→B22519-34, TAY-056649→056649, etc.), not just TBC. (3) Received Date picker added to review.php slip header row (local date, editable). (4) buildPreviewParams reads received_date from that picker instead of JS UTC clock.** |
+| **v1.31** | **2026-05-11** | **(1) review.php now shows the same app header + 3-tab bar as index.php, with "Upload Packing Slip" highlighted as the active tab; index.php tab links use #hash anchors so back-navigation restores the correct tab. (2) parse_packing_slip.py merges non-consecutive rows for the same part/type/pcs into one entry before nonstd detection; pallets, wooden cases, and co-packed secondaries are never auto-merged.** |
+| **v1.32** | **2026-05-11** | **review.php: per-slip Starting Serial # input (default 1). Serials column shows live #X–Y range per carton row. Co-packed secondaries, nonstd sub-rows, pallets, wooden cases count 0 box serials. printRow reads seq_start from serial-range span. recalcRow triggers a full serial-range refresh. Fixed escaped-backtick JS syntax error that broke upload/drop zone.** |
+| **v1.33** | **2026-05-16** | **index.php + review.php: fixed-position version badge (bottom-right corner) showing `LF Label Generator v1.33 · <page>`. CSS `.version-footer` class added. preview.php intentionally excluded — any footer element would render as an extra printed label. No functional changes.** |
+| **v1.34** | 2026-05-16 | *(skipped — superseded immediately by v1.35)* |
+| **v1.35** | 2026-05-16 | `review.php`: attempted JS-only qty-variant merge fix. Introduced dead-code bug in `boxCountForGroup` (ns always null for qty-variants). Superseded by v1.36. |
+| **v1.36** | **2026-05-16** | **`parse_packing_slip.py`: expanded `nonstd_remainder` detection to trigger on `pcs_per_box` difference as well as `num_labels` difference. CT-103072 / HHD-8643 style qty-variants (same num_labels, different pcs) now correctly emit `nonstd_remainder` flag with `nonstd_box_num` and `nonstd_copies=5`. `review.php` reverted to clean v1.33 JS — no JS changes required.** |
+| **v1.37** | **2026-05-16** | **`parse_packing_slip.py`: extended revision regex in `normalise_part` from `-([A-Z])$` to `-([A-Z]\d+|[A-Z])$` so that alphanumeric suffixes like `-B1`, `-C2` are correctly split into `base_part` + `revision` (e.g. `ECS-9562-B1` → `part_number=ECS-9562&revision=B1`). No PHP changes.** |
 | v1.17 | **2026-05-04** | **Fixed JS syntax error in v1.16: barcode IIFE and fitText IIFE were merged incorrectly, dropping the closing `})()` on the barcode block and killing all JsBarcode calls** |
 
 ---
