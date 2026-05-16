@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.29)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.37)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -218,10 +218,10 @@ def normalise_part(raw_part):
     if raw.upper().startswith("TBCTW-"):
         display = raw[3:]          # strip "TBC" → "TW-I1-9988-B"
         rest = display             # e.g. "TW-I1-9988-B"
-        # strip revision from base key
-        rev_m = re.search(r"-([A-Z])$", rest)
+        # strip revision from base key (single letter OR letter+digits, e.g. B1)
+        rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", rest)
         revision = rev_m.group(1) if rev_m else None
-        base = rest[:-2] if revision else rest
+        base = rest[:-(len(revision) + 1)] if revision else rest
         return display, "TurboChef", base, revision
 
     # Standard: split on first dash to get prefix
@@ -229,15 +229,23 @@ def normalise_part(raw_part):
     prefix_m = re.match(r'^([A-Za-z]+)', raw)
     prefix = prefix_m.group(1).upper() if prefix_m else raw.split('-')[0].upper()
 
-    # Revision is last token if it's a single capital letter
-    rev_m = re.search(r"-([A-Z])$", raw)
+    # Revision is last token if it's a single capital letter OR letter+digits (e.g. B1, C2)
+    rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", raw)
     revision = rev_m.group(1) if rev_m else None
-    base = raw[:-2] if revision else raw   # strip "-X" suffix for EXCEPTIONS key
+    base = raw[:-(len(revision) + 1)] if revision else raw  # strip "-REV" suffix for EXCEPTIONS key
 
-    # Strip "TBC-" prefix for EXCEPTIONS lookup (e.g. "TBC-ENC-1833-B" → "ENC-1833")
+    # Strip leading PREFIX- from base_part for barcode display.
+    # For TBC parts the sub-prefix (ENC-, HHD-, etc.) is the "real" part number.
+    # For all other customers (APS, TAY, MCS, BPI, etc.) the prefix is just the
+    # customer code and should not appear on the label.
     exc_key = base
     if exc_key.upper().startswith("TBC-"):
         exc_key = exc_key[4:]
+    else:
+        # Strip any known 2-4 char alpha prefix followed by a dash
+        strip_m = re.match(r'^([A-Za-z]{2,4})-(.+)$', exc_key)
+        if strip_m and strip_m.group(1).upper() in CUSTOMER_MAP:
+            exc_key = strip_m.group(2)
 
     customer = CUSTOMER_MAP.get(prefix, f"Unknown ({prefix})")
 
@@ -352,20 +360,78 @@ def parse_packing_slip(filepath):
     if pending_secondary and last_primary is not None:
         flush_secondary(last_primary, pending_secondary)
 
-    # ── Post-process: detect remainder (non-standard) boxes ──────────────
-    # When consecutive carton groups share the same base_part, the one with
-    # the smaller num_labels is a remainder box (non-standard qty).
-    # Mark it with "nonstd_remainder" flag and record nonstd_box_num.
+    # ── Post-process step 1: consolidate scattered same-part rows ─────────
+    # Parts that appear in multiple non-consecutive runs (e.g. same PN spread
+    # across pallets in the packing slip) are merged into a single entry.
+    # Merge key = (base_part, container_type, pcs_per_box).
+    # co_packed_secondary rows are NOT merged (they depend on their parent count).
+    # Rows with different pallet_group values are kept separate.
+    from collections import OrderedDict
+    merged: dict = OrderedDict()
+    unmerged = []
+    for g in label_groups:
+        is_secondary = "co_packed_secondary" in g.get("flags", [])
+        # Key: part + type + pcs. pallet_group kept separate if set.
+        key = (g["base_part"], g["container_type"], g["pcs_per_box"], g.get("pallet_group"))
+        if is_secondary or g["container_type"] != "carton":
+            # Pallets, wooden cases, and co-packed secondaries are never merged
+            unmerged.append(("__unmerged__", g))
+            continue
+        if key in merged:
+            merged[key]["num_labels"] += g["num_labels"]
+            merged[key]["total_labels"] += g["total_labels"]
+            # Union flags (excluding nonstd_remainder from sub-rows)
+            for fl in g.get("flags", []):
+                if fl not in merged[key]["flags"]:
+                    merged[key]["flags"].append(fl)
+            # Keep the first pallet_group seen (or override if previously None)
+            if merged[key]["pallet_group"] is None and g.get("pallet_group"):
+                merged[key]["pallet_group"] = g["pallet_group"]
+        else:
+            merged[key] = dict(g)  # copy so we don't mutate the original
+
+    # Rebuild label_groups: merged cartons in order of first appearance, then unmerged
+    # Preserve original order by interleaving based on OrderedDict insertion order.
+    # Non-carton rows stay in their original relative order.
+    # Strategy: walk original list; on first encounter of a key emit the merged entry,
+    # on subsequent encounters skip. Non-carton rows emitted in place.
+    seen_keys: set = set()
+    label_groups_new = []
+    unmerged_iter = iter(unmerged)
+    for g in label_groups:
+        is_secondary = "co_packed_secondary" in g.get("flags", [])
+        key = (g["base_part"], g["container_type"], g["pcs_per_box"], g.get("pallet_group"))
+        if is_secondary or g["container_type"] != "carton":
+            label_groups_new.append(next(unmerged_iter)[1])
+        else:
+            if key not in seen_keys:
+                seen_keys.add(key)
+                label_groups_new.append(merged[key])
+            # else: duplicate — already emitted, skip
+    label_groups = label_groups_new
+
+    # ── Post-process step 2: detect remainder (non-standard) boxes ─────────
+    # After merging, check for consecutive same-part carton rows where the
+    # second has fewer boxes — that's the non-standard remainder.
+    # Note: after consolidation, genuine nonstd remainders only occur when
+    # the pcs_per_box differs between rows of the same base_part (different
+    # box sizes). Same-pcs rows are fully merged above.
     for i in range(1, len(label_groups)):
         cur = label_groups[i]
         prev = label_groups[i - 1]
-        if (cur["container_type"] == "carton"
-                and prev["container_type"] == "carton"
-                and cur["base_part"] == prev["base_part"]
-                and cur["num_labels"] < prev["num_labels"]
-                and "nonstd_remainder" not in cur["flags"]
-                and "co_packed_secondary" not in cur["flags"]):
+        _same_base   = cur["base_part"] == prev["base_part"]
+        _both_carton = cur["container_type"] == "carton" and prev["container_type"] == "carton"
+        _not_flagged = ("nonstd_remainder" not in cur["flags"]
+                        and "co_packed_secondary" not in cur["flags"]
+                        and "nonstd_remainder" not in prev["flags"]
+                        and "co_packed_secondary" not in prev["flags"])
+        # Trigger when: fewer boxes (classic non-std remainder) OR
+        # different pcs_per_box with same base_part (qty-variant non-std box).
+        _fewer_boxes = cur["num_labels"] < prev["num_labels"]
+        _diff_pcs    = cur["pcs_per_box"] != prev["pcs_per_box"]
+        if _same_base and _both_carton and _not_flagged and (_fewer_boxes or _diff_pcs):
             cur["flags"].append("nonstd_remainder")
+            # nonstd_box_num = first serial of this sub-group (prev boxes + 1)
             cur["nonstd_box_num"] = prev["num_labels"] + 1
             cur["nonstd_copies"] = 5
             # Merge total into the parent so total_labels is accurate
