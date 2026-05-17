@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.42)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.43)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -202,7 +202,7 @@ def pcs_from_label_text(part_number, label_text):
 def normalise_part(raw_part):
     """
     Given a raw part number string from col B, return:
-      (display_part, customer, base_for_exceptions, revision)
+      (display_part, customer, base_for_exceptions, revision, omit_customer)
 
     Handles:
       - Standard "PREFIX-REST-REV" format
@@ -228,8 +228,9 @@ def normalise_part(raw_part):
     if re.match(r"^\d+$", raw):
         if raw in KNOWN_PARTS:
             kp = KNOWN_PARTS[raw]
-            return raw, kp["customer"], kp["base_part"], kp["revision"]
-        return raw, "Unknown", raw, None
+            return raw, kp["customer"], kp["base_part"], kp["revision"],\
+                   False  # known numeric parts never omit customer
+        return raw, "Unknown", raw, None, False
 
     # TBCTW typo: e.g. TBCTW-I1-9988-B → display "TW-I1-9988-B", customer TurboChef
     if raw.upper().startswith("TBCTW-"):
@@ -239,7 +240,7 @@ def normalise_part(raw_part):
         rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", rest)
         revision = rev_m.group(1) if rev_m else (_pre_rev or None)
         base = rest[:-(len(revision) + 1)] if rev_m else rest
-        return display, "TurboChef", base, revision
+        return display, "TurboChef", base, revision, False  # TBCTW never omits customer
 
     # Standard: split on first dash to get prefix
     # Extract leading alphabetic characters as the customer prefix
@@ -264,7 +265,8 @@ def normalise_part(raw_part):
         prefix_m2 = re.match(r'^([A-Za-z]+)-', raw)
         prefix2   = prefix_m2.group(1).upper() if prefix_m2 else ""
         customer  = CUSTOMER_MAP.get(prefix2, f"Unknown ({prefix2})")
-        return display, customer, exc_key, revision
+        return display, customer, exc_key, revision,\
+               (prefix2 in OMIT_CUSTOMER_PREFIXES)
 
     # Revision is last token if it's a single capital letter OR letter+digits (e.g. B1, C2)
     rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", raw)
@@ -286,7 +288,8 @@ def normalise_part(raw_part):
 
     customer = CUSTOMER_MAP.get(prefix, f"Unknown ({prefix})")
 
-    return raw, customer, exc_key, revision
+    return raw, customer, exc_key, revision,\
+           (prefix.upper() in OMIT_CUSTOMER_PREFIXES)
 
 
 # ---------------------------------------------------------------------------
@@ -312,7 +315,7 @@ def parse_packing_slip(filepath):
     def flush_secondary(primary_group, secondary_pns):
         """Attach secondary (co-packed) PNs to the primary group's carton count."""
         for sec_pn in secondary_pns:
-            display, customer, exc_key, revision = normalise_part(sec_pn)
+            display, customer, exc_key, revision, omit_cust = normalise_part(sec_pn)
             exc = EXCEPTIONS.get(exc_key, {})
             lpc = exc.get("labels_per_carton", 1)
             ppl = exc.get("pcs_per_label", None)
@@ -330,6 +333,7 @@ def parse_packing_slip(filepath):
                 "labels_per_unit": 1,
                 "total_labels":    total,
                 "flags":           ["co_packed_secondary"],
+                "omit_customer":   omit_cust,
                 "co_packed_parent": primary_group["base_part"],
                 "pallet_group":    primary_group.get("pallet_group"),
             })
@@ -362,7 +366,7 @@ def parse_packing_slip(filepath):
         if qty_units is None:
             continue
 
-        display, customer, exc_key, revision = normalise_part(col_b)
+        display, customer, exc_key, revision, omit_cust = normalise_part(col_b)
         pcs = pcs_from_label_text(col_b, col_a)
 
         # Flags
@@ -388,7 +392,7 @@ def parse_packing_slip(filepath):
             "labels_per_unit": lpu,
             "total_labels":    total_labels,
             "flags":           flags,
-            "omit_customer":   (prefix.upper() in OMIT_CUSTOMER_PREFIXES),
+            "omit_customer":   omit_cust,
             "pallet_group":    pallet_group,
         }
 
