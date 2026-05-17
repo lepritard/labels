@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.41)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.42)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -68,7 +68,7 @@ CUSTOMER_MAP = {
     "BPI":    "Berryman Products",
     "CPI":    "Commercial Plastics",
     "SCI":    "Stericycle",
-    "FRE":    "Frymaster",
+    "FRE":    "TurboChef",
     "IB":     "IB Products",
     "NGC":    "Manitowoc",
     "HCW":    "Henny Penny",
@@ -88,6 +88,11 @@ KNOWN_PARTS = {
 }
 
 # Co-packed inner-box rules.
+# Prefixes whose labels should omit the customer name entirely.
+# These parts ship to intermediary companies; the customer field is
+# set correctly for internal reference but suppressed on the printed label.
+OMIT_CUSTOMER_PREFIXES = {"FRE"}
+
 # Key = base part number WITHOUT revision letter (e.g. "ENC-1833", not "TBC-ENC-1833-B")
 # labels_per_carton: how many inner boxes (= labels) exist inside each outer carton
 # pcs_per_label: pieces in each inner box
@@ -383,6 +388,7 @@ def parse_packing_slip(filepath):
             "labels_per_unit": lpu,
             "total_labels":    total_labels,
             "flags":           flags,
+            "omit_customer":   (prefix.upper() in OMIT_CUSTOMER_PREFIXES),
             "pallet_group":    pallet_group,
         }
 
