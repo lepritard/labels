@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Packing Slip Review
-// review.php v1.41
+// review.php v1.42
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -691,6 +691,7 @@ function buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFnameCtx) 
     p.set('part_number',   barcodePart);
     p.set('received_date', today);
     p.set('std_qty',       pcs);
+    if (g.omit_customer) p.set('omit_customer', '1');
     p.set('copies',        '1');
     p.set('seq_start',     (seqStart > 0 ? seqStart : 0).toString());
     if (g.revision) p.set('revision', g.revision);
@@ -721,6 +722,7 @@ function buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFnameCtx) 
     p.set('na_number',     naVal || '');
     p.set('part_number',   barcodePart);
     p.set('received_date', today);
+    if (g.omit_customer) p.set('omit_customer', '1');
     p.set('copies',        g.labels_per_unit.toString());
     p.set('pallet_num',    '1');
     p.set('total_pallets', units);
@@ -753,6 +755,6 @@ function renderResults(data) {
   renderResultsCore(data);
 }
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.41 &middot; review</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.42 &middot; review</div>
 </body>
 </html>
