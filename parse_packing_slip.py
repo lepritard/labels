@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.37)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.40)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -293,6 +293,7 @@ def parse_packing_slip(filepath):
                 "labels_per_unit": 1,
                 "total_labels":    total,
                 "flags":           ["co_packed_secondary"],
+                "co_packed_parent": primary_group["base_part"],
                 "pallet_group":    primary_group.get("pallet_group"),
             })
 
