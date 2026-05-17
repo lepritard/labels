@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Packing Slip Review
-// review.php v1.42
+// review.php v1.43
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -755,6 +755,6 @@ function renderResults(data) {
   renderResultsCore(data);
 }
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.42 &middot; review</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.43 &middot; review</div>
 </body>
 </html>
