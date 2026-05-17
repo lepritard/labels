@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Packing Slip Review
-// review.php v1.37
+// review.php v1.40
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -372,8 +372,11 @@ function buildSlipBlock(fname, slip) {
   setTimeout(() => {
     const tbody = document.getElementById('tbody-' + sanitize(fname));
 
-    // Separate primary rows from nonstd_remainder rows
-    const primaryGroups = groups.filter(g => !g.flags?.includes('nonstd_remainder'));
+    // Separate true primary rows (not nonstd_remainder, not co_packed_secondary)
+    const primaryGroups = groups.filter(g =>
+      !g.flags?.includes('nonstd_remainder') &&
+      !g.flags?.includes('co_packed_secondary')
+    );
 
     // Sort primaries: customer asc, then base_part asc
     primaryGroups.sort((a, b) => {
@@ -385,7 +388,10 @@ function buildSlipBlock(fname, slip) {
       return pa < pb ? -1 : pa > pb ? 1 : 0;
     });
 
-    // Re-attach nonstd_remainder siblings right after their parent in sorted order
+    // Re-attach dependents (nonstd_remainder + co_packed_secondary) right after
+    // their parent in sorted order.
+    // nonstd_remainder: matched by base_part on the immediately following group.
+    // co_packed_secondary: matched by co_packed_parent field set by the parser.
     const sortedGroups = [];
     primaryGroups.forEach(g => {
       sortedGroups.push(g);
@@ -394,6 +400,13 @@ function buildSlipBlock(fname, slip) {
       if (ns?.flags?.includes('nonstd_remainder') && ns.base_part === g.base_part) {
         sortedGroups.push(ns);
       }
+      // Attach any co_packed_secondary rows whose parent is this group
+      groups.forEach(sec => {
+        if (sec.flags?.includes('co_packed_secondary') &&
+            sec.co_packed_parent === g.base_part) {
+          sortedGroups.push(sec);
+        }
+      });
     });
 
     // Update slipData so printRow index lookups stay correct
@@ -583,13 +596,12 @@ function rebuildActions(fname, slip, groups, totalBox, totalPallet, totalCase) {
 // ── Print helpers ────────────────────────────────────────────────────────────
 // ── Serial range helpers ─────────────────────────────────────────────────
 // boxCountForGroup: number of PHYSICAL BOXES a group represents.
-//   carton primary       -> num_labels (or live input if edited)
-//   nonstd_remainder     -> 0  (counted by the parent row)
-//   co_packed_secondary  -> 0  (inner labels, same physical carton)
-//   pallet / wooden_case -> 0  (not box serials)
+//   carton primary         -> num_labels (or live input if edited)
+//   co_packed_secondary    -> num_labels (palletized independently after receiving)
+//   nonstd_remainder       -> 0  (counted by the parent row)
+//   pallet / wooden_case   -> 0  (not box serials)
 function boxCountForGroup(g, allGrps, safeFname, rowNum) {
   if (g.container_type !== 'carton') return 0;
-  if (g.flags?.includes('co_packed_secondary')) return 0;
   if (g.flags?.includes('nonstd_remainder')) return 0;
   const myIdx = allGrps.indexOf(g);
   const ns = (allGrps[myIdx + 1]?.flags?.includes('nonstd_remainder')
@@ -606,7 +618,9 @@ function refreshSerialRanges(safeFname) {
   const fname = Object.keys(slipData).find(k => sanitize(k) === safeFname);
   if (!fname) return;
   const startEl = document.getElementById('serial-start-' + safeFname);
-  let serial = parseInt(startEl?.value) || 1;
+  const _startRaw = parseInt(startEl?.value);
+  const _hasSerial = (_startRaw > 0);
+  let serial = _hasSerial ? _startRaw : 1;
   const groups = (slipData[fname] || {}).label_groups || [];
   groups.forEach((g, idx) => {
     if (g.flags?.includes('nonstd_remainder')) return;
@@ -618,8 +632,13 @@ function refreshSerialRanges(safeFname) {
       el.textContent = '—'; el.style.opacity = '0.35';
     } else {
       const first = serial, last = serial + count - 1;
-      el.style.opacity = '1';
-      el.textContent = first === last ? `#${first}` : `#${first}–${last}`;
+      if (_hasSerial) {
+        el.style.opacity = '1';
+        el.textContent = first === last ? `#${first}` : `#${first}\u2013${last}`;
+      } else {
+        el.style.opacity = '0.35';
+        el.textContent = '\u2014';
+      }
       serial = last + 1;
     }
   });
@@ -637,9 +656,14 @@ function printRow(safeFname, idx) {
   const units = parseInt(document.getElementById(`${rowId}-units`)?.value) || g.num_labels;
   const pcs   = parseInt(document.getElementById(`${rowId}-pcs`)?.value)   || g.pcs_per_box || 0;
 
+  // Read this row's own serial span; fall back to 0 (omit_serial) if blank.
   const _srEl   = document.getElementById(`row-${safeFname}-${rowNum}-serial`);
   const _srNums = (_srEl ? _srEl.textContent : '').replace(/[^0-9]/g, ' ').trim().split(/\s+/);
-  const seqStart = (_srNums[0] && _srNums[0] !== '') ? (parseInt(_srNums[0]) || 1) : 1;
+  const _startInput = document.getElementById('serial-start-' + safeFname);
+  const _startVal   = parseInt(_startInput?.value);
+  const seqStart = (_srNums[0] && /^\d+$/.test(_srNums[0]))
+                     ? parseInt(_srNums[0])
+                     : (_startVal > 0 ? _startVal : 0);
   const params = buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFname);
   window.open('preview.php?' + params, '_blank');
 }
@@ -668,7 +692,7 @@ function buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFnameCtx) 
     p.set('received_date', today);
     p.set('std_qty',       pcs);
     p.set('copies',        '1');
-    p.set('seq_start',     (seqStart || 1).toString());
+    p.set('seq_start',     (seqStart > 0 ? seqStart : 0).toString());
     if (g.revision) p.set('revision', g.revision);
     if (g.flags && g.flags.includes('t013_prepped')) p.set('t013_prepped', '1');
 
@@ -729,6 +753,6 @@ function renderResults(data) {
   renderResultsCore(data);
 }
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.37 &middot; review</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.40 &middot; review</div>
 </body>
 </html>
