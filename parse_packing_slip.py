@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.40)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.41)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -204,8 +204,20 @@ def normalise_part(raw_part):
       - TBCTW typo → TBC prefix, display as "TW-REST-REV"
       - Bare numeric parts via KNOWN_PARTS
       - TBC sub-prefixes (ENC, HHD, etc.) mapped to TurboChef directly
+      - Trailing " REV<N>" / "-REV<N>" suffix (e.g. "TBC-CT-104546 REV2")
+      - T-series tooling suffix (e.g. "TBC-ECO-9447-B-T013" → base "ECO-9447-T013", rev "B")
     """
     raw = raw_part.strip()
+
+    # Pre-strip trailing " REV<N>" or "-REV<N>" suffix (case-insensitive).
+    # e.g. "TBC-CT-104546 REV2" → raw="TBC-CT-104546", _pre_rev="2"
+    # Captured revision may be overridden by later dash-suffix logic, but this
+    # ensures the token is removed from the part number string first.
+    _pre_rev = None
+    _rev_sfx = re.search(r'[\s-]REV\s*([A-Z0-9]+)$', raw, re.IGNORECASE)
+    if _rev_sfx:
+        _pre_rev = _rev_sfx.group(1)
+        raw = raw[:_rev_sfx.start()].strip()
 
     # Bare numeric
     if re.match(r"^\d+$", raw):
@@ -220,8 +232,8 @@ def normalise_part(raw_part):
         rest = display             # e.g. "TW-I1-9988-B"
         # strip revision from base key (single letter OR letter+digits, e.g. B1)
         rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", rest)
-        revision = rev_m.group(1) if rev_m else None
-        base = rest[:-(len(revision) + 1)] if revision else rest
+        revision = rev_m.group(1) if rev_m else (_pre_rev or None)
+        base = rest[:-(len(revision) + 1)] if rev_m else rest
         return display, "TurboChef", base, revision
 
     # Standard: split on first dash to get prefix
@@ -229,10 +241,30 @@ def normalise_part(raw_part):
     prefix_m = re.match(r'^([A-Za-z]+)', raw)
     prefix = prefix_m.group(1).upper() if prefix_m else raw.split('-')[0].upper()
 
+    # T-series tooling suffix: PREFIX-BASE-REV-Txxxx
+    # e.g. TBC-ECO-9447-B-T013 → display "ECO-9447-T013", revision "B"
+    # Detect pattern: after stripping any leading PREFIX-, the rest matches BASE-LETTER-Tdddd
+    _t_series = re.search(r'^(.+)-([A-Z])-(T\d+)$', raw, re.IGNORECASE)
+    if _t_series:
+        # Rebuild: strip leading customer prefix from group(1) for display
+        _t_base_raw = _t_series.group(1)   # e.g. "TBC-ECO-9447"
+        _t_rev      = _t_series.group(2)   # e.g. "B"
+        _t_sfx      = _t_series.group(3)   # e.g. "T013"
+        # Strip customer prefix for display/exc_key
+        _t_strip = re.match(r'^[A-Za-z]{2,4}-(.+)$', _t_base_raw)
+        _t_base_clean = _t_strip.group(1) if _t_strip else _t_base_raw
+        display   = f"{_t_base_clean}-{_t_sfx}"   # ECO-9447-T013
+        exc_key   = display                        # used for EXCEPTIONS lookup
+        revision  = _t_rev.upper()
+        prefix_m2 = re.match(r'^([A-Za-z]+)-', raw)
+        prefix2   = prefix_m2.group(1).upper() if prefix_m2 else ""
+        customer  = CUSTOMER_MAP.get(prefix2, f"Unknown ({prefix2})")
+        return display, customer, exc_key, revision
+
     # Revision is last token if it's a single capital letter OR letter+digits (e.g. B1, C2)
     rev_m = re.search(r"-([A-Z]\d+|[A-Z])$", raw)
-    revision = rev_m.group(1) if rev_m else None
-    base = raw[:-(len(revision) + 1)] if revision else raw  # strip "-REV" suffix for EXCEPTIONS key
+    revision = rev_m.group(1) if rev_m else (_pre_rev or None)
+    base = raw[:-(len(revision) + 1)] if rev_m else raw  # strip "-REV" suffix for EXCEPTIONS key
 
     # Strip leading PREFIX- from base_part for barcode display.
     # For TBC parts the sub-prefix (ENC-, HHD-, etc.) is the "real" part number.
