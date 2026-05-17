@@ -8,7 +8,7 @@ This guide covers everything a new developer needs to understand, modify, and ex
 
 - **No framework, no build step.** Everything is plain PHP, Python, and vanilla JavaScript. A new contributor with basic web skills should be able to read any file without a toolchain.
 - **Parser is the source of truth.** The PHP/JS UI trusts the JSON that `parse_packing_slip.py` emits. If label data is wrong, fix the parser first.
-- **Version every change.** Bump the version string in all five files and add a row to the README changelog. The version badge in the UI footer (bottom-right of every page) must match.
+- **Version every change.** Bump the version string in all five files and add a row to `CHANGELOG.md` (newest entry at the top). The version badge in the UI footer (bottom-right of every page) must match.
 
 ---
 
@@ -65,9 +65,9 @@ Every PR that changes behaviour must:
    - `// preview.php v1.XX`
    - `"""parse_packing_slip.py — Evolved packing slip parser (v2, v1.XX)"""`
 2. Update the footer string `LF Label Generator&nbsp;v1.XX` in `index.php` and `review.php`.
-3. Add a changelog row to the `## Revision History` table in `README.md`.
+3. Add a new row at the **top** of the changelog table in `CHANGELOG.md` (the Revision History table was moved out of `README.md` in v1.40).
 
-Use the `v1.33 → v1.37` entries in the README changelog as style references.
+Use the existing entries in `CHANGELOG.md` as style references.
 
 ---
 
@@ -133,7 +133,7 @@ Chrome and Edge are reliable. Firefox and Safari may require additional `@page` 
 
 - [ ] All five version strings bumped
 - [ ] Both footer strings bumped (`index.php`, `review.php`)
-- [ ] README changelog row added
+- [ ] `CHANGELOG.md` row added (newest entry at top)
 - [ ] `PACKING (PO22642).xlsx` re-parsed; 703 total labels confirmed
 - [ ] CT-103072 and HHD-8643 sub-rows present with correct serial ranges
 - [ ] ECS-9562-B1 preview URL contains `revision=B1`
