@@ -1,5 +1,5 @@
 <?php
-// preview.php v1.40
+// preview.php v1.41
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function format_date($d) {
   $ts = strtotime($d);
