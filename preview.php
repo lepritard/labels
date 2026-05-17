@@ -1,5 +1,5 @@
 <?php
-// preview.php v1.41
+// preview.php v1.42
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function format_date($d) {
   $ts = strtotime($d);
@@ -24,6 +24,7 @@ $copies        = max(1, intval($_GET['copies'] ?? 1));
 $part_number   = trim($_GET['part_number'] ?? '');
 $seq_start_raw = isset($_GET['seq_start']) ? intval($_GET['seq_start']) : 1;
 $omit_serial   = ($seq_start_raw === 0);          // seq_start=0 → suppress serial on label
+$omit_customer = !empty($_GET['omit_customer']); // omit_customer=1 → hide Customer: line (e.g. FRE parts)
 $seq_start     = $omit_serial ? 1 : max(1, $seq_start_raw);
 $total_boxes   = max(1, intval($_GET['total_boxes'] ?? 1));
 $std_qty       = intval($_GET['std_qty'] ?? 0);
@@ -78,7 +79,11 @@ if ($type === 'pallet') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Labels — <?php echo h($customer); ?></title>
+<?php
+  $_box_word  = ($total_boxes == 1) ? 'box' : 'boxes';
+  $_page_title = h($part_number) . ' (' . $total_boxes . ' ' . $_box_word . ')';
+?>
+<title><?php echo $_page_title; ?></title>
 <style>
 @font-face {
   font-family: 'LFCenturyGothic';
@@ -222,7 +227,9 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
     $serial = $serial_prefix . sprintf('%04d', $box_seq); $sbc = 'sbc_'.$bid;
 ?>
 <div class="label-page"><div class="box-label">
+  <?php if (!$omit_customer): ?>
   <div class="bl-header"><div><span class="bl-customer-label">Customer:</span><span class="bl-customer"> <?php echo h($customer); ?></span></div></div>
+  <?php endif; ?>
   <div class="bl-body<?php echo $is_nonstd ? ' nonstd' : ''; ?>">
     <div class="bl-left">
       <div class="bl-pn-label">Part Number:</div>
@@ -268,7 +275,9 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
 ?>
 <div class="label-page"><div class="pallet-label">
   <div class="pl-header">
+    <?php if (!$omit_customer): ?>
     <div><span class="pl-customer-label">Customer:</span><span class="pl-customer"> <?php echo h($customer); ?></span></div>
+    <?php endif; ?>
     <div class="pl-na-header"><?php echo h($na_number); ?></div>
   </div>
   <div class="pl-body">
