@@ -6,6 +6,7 @@ All notable changes to this project are documented here in reverse-chronological
 
 | Version | Date | Changes |
 |---------|------|---------|
+| **v1.41** | **2026-05-16** | **Fix: `parse_packing_slip.py` now handles two new part-number formats. (1) Trailing ` REV<N>` / `-REV<N>` suffix (e.g. `TBC-CT-104546 REV2`) is pre-stripped and captured as the revision before any other parsing, covering variants like `-rev1`, ` rev 2`, `-REV-A`. (2) T-series tooling suffix (e.g. `TBC-ECO-9447-B-T013`) is reordered so the T-designator appends to the base part (`ECO-9447-T013`) and the preceding letter becomes the revision (`B`). No PHP or JS changes.** |
 | **v1.40** | **2026-05-16** | **Fix: quantity unit on box and pallet labels now correctly reads `1 pc` (singular) instead of `1 pcs`. Applies to standard, non-standard, and pallet label qty displays. Changelog extracted from README into `CHANGELOG.md`.** |
 | v1.17 | **2026-05-04** | **Fixed JS syntax error in v1.16: barcode IIFE and fitText IIFE were merged incorrectly, dropping the closing `})()` on the barcode block and killing all JsBarcode calls** |
 | **v1.37** | **2026-05-16** | **`parse_packing_slip.py`: extended revision regex in `normalise_part` from `-([A-Z])$` to `-([A-Z]\d+|[A-Z])$` so that alphanumeric suffixes like `-B1`, `-C2` are correctly split into `base_part` + `revision` (e.g. `ECS-9562-B1` → `part_number=ECS-9562&revision=B1`). No PHP changes.** |
