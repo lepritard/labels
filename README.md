@@ -83,9 +83,9 @@ Navigate to the app URL in any browser on your network. The main form has two ta
 ```
 lf-labels/
 ├── index.php               # Main entry form (UI)
-├── review.php              # Packing slip upload & review UI (v1.42)
-├── parse_slip.php          # PHP → Python parser bridge (v1.42)
-├── parse_packing_slip.py   # Python packing slip parser (v1.42)
+├── review.php              # Packing slip upload & review UI (v1.43)
+├── parse_slip.php          # PHP → Python parser bridge (v1.43)
+├── parse_packing_slip.py   # Python packing slip parser (v1.43)
 ├── preview.php             # Label renderer (outputs printable HTML)
 ├── README.md               # This file
 └── assets/
