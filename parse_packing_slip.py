@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.43)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.44)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -281,9 +281,14 @@ def normalise_part(raw_part):
     if exc_key.upper().startswith("TBC-"):
         exc_key = exc_key[4:]
     else:
-        # Strip any known 2-4 char alpha prefix followed by a dash
+        # Strip any known 2-4 char alpha prefix followed by a dash.
+        # Exception: prefixes in OMIT_CUSTOMER_PREFIXES keep their prefix in
+        # the barcode because the prefix is part of the part identity, not
+        # just a customer code (e.g. FRE-1160 barcodes as "FRE-1160", not "1160").
         strip_m = re.match(r'^([A-Za-z]{2,4})-(.+)$', exc_key)
-        if strip_m and strip_m.group(1).upper() in CUSTOMER_MAP:
+        if (strip_m
+                and strip_m.group(1).upper() in CUSTOMER_MAP
+                and strip_m.group(1).upper() not in OMIT_CUSTOMER_PREFIXES):
             exc_key = strip_m.group(2)
 
     customer = CUSTOMER_MAP.get(prefix, f"Unknown ({prefix})")
