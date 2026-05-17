@@ -1,5 +1,5 @@
 <?php
-// preview.php v1.37
+// preview.php v1.40
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function format_date($d) {
   $ts = strtotime($d);
@@ -22,9 +22,13 @@ $serial_prefix = date('y', strtotime($raw_date)) . sprintf('%03d', date('z', str
 $copies        = max(1, intval($_GET['copies'] ?? 1));
 
 $part_number   = trim($_GET['part_number'] ?? '');
-$seq_start     = max(1, intval($_GET['seq_start'] ?? 1));
+$seq_start_raw = isset($_GET['seq_start']) ? intval($_GET['seq_start']) : 1;
+$omit_serial   = ($seq_start_raw === 0);          // seq_start=0 → suppress serial on label
+$seq_start     = $omit_serial ? 1 : max(1, $seq_start_raw);
 $total_boxes   = max(1, intval($_GET['total_boxes'] ?? 1));
 $std_qty       = intval($_GET['std_qty'] ?? 0);
+// Singular/plural unit: 1 pc, 2+ pcs
+function pc($n) { return $n == 1 ? 'pc' : 'pcs'; }
 // Parse multiple non-standard boxes from JSON (v1.11+)
 $nonstd_entries = [];
 if (!empty($_GET['nonstd_json'])) {
@@ -236,23 +240,25 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="bl-box-counter">Box <strong><?php echo $box_num; ?></strong> of <strong><?php echo $total_boxes; ?></strong></div>
       <div class="bl-qty-label">Qty:</div>
       <?php if ($is_nonstd): ?>
-        <div class="bl-qty-line" data-fittext data-fittext-max="29"><span class="bl-qty-arrow nonstd-size">&#9668;</span><span class="bl-qty-num nonstd-size"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow nonstd-size">&#9658;</span><span class="bl-qty-pcs nonstd-size"> pcs</span></div>
+        <div class="bl-qty-line" data-fittext data-fittext-max="29"><span class="bl-qty-arrow nonstd-size">&#9668;</span><span class="bl-qty-num nonstd-size"><?php echo number_format($qty); ?></span><span class="bl-qty-arrow nonstd-size">&#9658;</span><span class="bl-qty-pcs nonstd-size"> <?php echo pc($qty); ?></span></div>
       <?php else: ?>
-        <div class="bl-qty-line" data-fittext data-fittext-max="22"><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-pcs"> pcs</span></div>
+        <div class="bl-qty-line" data-fittext data-fittext-max="22"><span class="bl-qty-num"><?php echo number_format($qty); ?></span><span class="bl-qty-pcs"> <?php echo pc($qty); ?></span></div>
       <?php endif; ?>
     </div>
   </div>
   <div class="bl-footer">
     <div class="bl-footer-left">
       <div class="bl-received">Received:<br><?php echo h($received_date); ?></div>
+<?php if (!$omit_serial): ?>
       <svg id="<?php echo $sbc; ?>" class="bl-serial-barcode"></svg>
       <div class="bl-serial-number"><?php echo h($serial); ?></div>
+<?php endif; ?>
     </div>
     <?php if ($logo_data): ?><div class="bl-logo-wrap"><img src="<?php echo $logo_data; ?>" class="bl-logo" alt="Lake Forest Industries"></div><?php endif; ?>
   </div>
 </div></div>
 <script>
-(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}try{JsBarcode('#<?php echo $sbc; ?>', <?php echo json_encode($serial); ?>, {format:'CODE128', width:1.2, height:28, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $sbc; ?>').style.display='none';}})();
+(function(){try{JsBarcode('#<?php echo $bc; ?>', <?php echo json_encode($part_number); ?>, {format:'CODE128', width:2.4, height:120, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $bc; ?>').style.display='none';}<?php if (!$omit_serial): ?>try{JsBarcode('#<?php echo $sbc; ?>', <?php echo json_encode($serial); ?>, {format:'CODE128', width:1.2, height:28, displayValue:false, margin:0, background:'#ffffff', lineColor:'#000000'});}catch(e){document.getElementById('<?php echo $sbc; ?>').style.display='none';}<?php endif; ?>})();
 (function(){var els=document.querySelectorAll('[data-fittext]');els.forEach(function(el){var max=parseFloat(el.getAttribute('data-fittext-max'))||22;var spans=el.querySelectorAll('span');var fs=max;while(fs>8&&el.scrollWidth>el.clientWidth+1){fs-=0.5;spans.forEach(function(sp){sp.style.fontSize=fs+'pt';});}});})();
 </script>
 <?php endforeach; elseif ($type === 'pallet'):
@@ -271,16 +277,16 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
       <div class="pl-pallet-row">Pallet <?php echo $pallet_num; ?> of <?php echo $total_pallets; ?> for Part Number:</div>
       <svg id="<?php echo $bc1; ?>" class="pl-barcode"></svg>
       <div class="pl-part-number"><?php echo h($part_number); ?></div>
-      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
-      <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> pcs)</div><?php endif; ?>
+      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> <?php echo pc($pallet_qty); ?><?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
+      <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> <?php echo pc($pallet_box_qty); ?>)</div><?php endif; ?>
     </div>
     <div class="pl-mixed-col"><div class="pl-mixed-stamp">MIXED<br>PALLET</div></div>
     <div class="pl-part-col">
       <div class="pl-pallet-row">Pallet <?php echo $pallet_num_2; ?> of <?php echo $total_pallets_2; ?> for Part Number:</div>
       <svg id="<?php echo $bc2; ?>" class="pl-barcode"></svg>
       <div class="pl-part-number"><?php echo h($part_number_2); ?></div>
-      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty_2); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
-      <?php if ($pallet_boxes_2 && $pallet_box_qty_2): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes_2; ?> boxes of <?php echo $pallet_box_qty_2; ?> pcs)</div><?php endif; ?>
+      <div class="pl-inline-qty"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty_2); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> <?php echo pc($pallet_qty_2); ?><?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
+      <?php if ($pallet_boxes_2 && $pallet_box_qty_2): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes_2; ?> boxes of <?php echo $pallet_box_qty_2; ?> <?php echo pc($pallet_box_qty_2); ?>)</div><?php endif; ?>
     </div>
   <?php else: ?>
     <div class="pl-left">
@@ -290,8 +296,8 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
     </div>
     <div class="pl-right">
       <div class="pl-qty-label">Qty:</div>
-      <div class="pl-qty-line"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> pcs<?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
-      <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> pcs)</div><?php endif; ?>
+      <div class="pl-qty-line"><span class="pl-qty-arrow">&#9668;</span><span class="pl-qty-num"><?php echo number_format($pallet_qty); ?></span><span class="pl-qty-arrow">&#9658;</span><span class="pl-qty-pcs"> <?php echo pc($pallet_qty); ?><?php echo $unit_label ? ' / '.h($unit_label) : ''; ?></span></div>
+      <?php if ($pallet_boxes && $pallet_box_qty): ?><div class="pl-qty-boxes">(<?php echo $pallet_boxes; ?> boxes of <?php echo $pallet_box_qty; ?> <?php echo pc($pallet_box_qty); ?>)</div><?php endif; ?>
     </div>
   <?php endif; ?>
   </div>
