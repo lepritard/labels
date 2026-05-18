@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.44)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.47)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
@@ -69,9 +69,9 @@ CUSTOMER_MAP = {
     "CPI":    "Commercial Plastics",
     "SCI":    "Stericycle",
     "FRE":    "TurboChef",
-    "IB":     "IB Products",
-    "NGC":    "Manitowoc",
-    "HCW":    "Henny Penny",
+    "IB":    "DAWGS",
+    "NGC":    "TurboChef",
+    "HCW":    "TurboChef",
     "HHD":    "TurboChef",       # HHD prefix is TurboChef product line
     "HCT":    "TurboChef",
     "HHS":    "TurboChef",
@@ -317,13 +317,18 @@ def parse_packing_slip(filepath):
 
     pending_secondary = []   # accumulates secondary PNs until next primary row
 
-    def flush_secondary(primary_group, secondary_pns):
+    def flush_secondary(primary_group, secondary_pns, primary_col_a=""):
         """Attach secondary (co-packed) PNs to the primary group's carton count."""
         for sec_pn in secondary_pns:
             display, customer, exc_key, revision, omit_cust = normalise_part(sec_pn)
             exc = EXCEPTIONS.get(exc_key, {})
             lpc = exc.get("labels_per_carton", 1)
             ppl = exc.get("pcs_per_label", None)
+            # Fallback: try to read pcs for this secondary from
+            # the primary row's col A description text (the supplier
+            # often lists all co-packed quantities in one cell).
+            if ppl is None and primary_col_a:
+                ppl = pcs_from_label_text(sec_pn, primary_col_a)
             num_outer = primary_group["num_labels"]
             total = num_outer * lpc
 
@@ -344,6 +349,7 @@ def parse_packing_slip(filepath):
             })
 
     last_primary = None
+    last_primary_col_a = ""
 
     for row in rows[header_row + 1:data_end]:
         col_a = _s(row[0])
@@ -362,7 +368,7 @@ def parse_packing_slip(filepath):
 
         # Primary row — first flush any pending secondary PNs onto the PREVIOUS primary
         if pending_secondary and last_primary is not None:
-            flush_secondary(last_primary, pending_secondary)
+            flush_secondary(last_primary, pending_secondary, last_primary_col_a)
             pending_secondary = []
 
         # Parse primary row
@@ -403,10 +409,113 @@ def parse_packing_slip(filepath):
 
         label_groups.append(group)
         last_primary = group
+        last_primary_col_a = col_a
 
     # Flush any trailing secondary PNs
     if pending_secondary and last_primary is not None:
-        flush_secondary(last_primary, pending_secondary)
+        flush_secondary(last_primary, pending_secondary, last_primary_col_a)
+
+
+    # ── Post-process step 0: reconcile inverted co-pack remainder blocks ──
+    # The supplier occasionally lists the remainder box of a co-packed carton
+    # with the part order inverted (secondary part first, primary part second).
+    # Detection: a primary group at index i whose base_part previously appeared
+    # as a co_packed_secondary of an earlier group, AND whose own co_packed
+    # secondary's base_part is that earlier primary — i.e., both part numbers
+    # appear in both positions, just swapped.
+    # The earlier group is found by scanning indices 0..i-1 (never i itself),
+    # so the two ENC-1726 entries are never confused with each other.
+    # Action:
+    #   - Add the inverted group's num_labels to the original primary's count.
+    #   - If the inverted group's pcs differs from the standard secondary pcs,
+    #     record a nonstd_remainders entry on the original secondary group.
+    #   - Remove both inverted groups from label_groups.
+
+    to_remove = set()
+    for i, inv_primary in enumerate(label_groups):
+        if i in to_remove:
+            continue
+        if "co_packed_secondary" in inv_primary.get("flags", []):
+            continue
+        if "nonstd_remainder" in inv_primary.get("flags", []):
+            continue
+        if inv_primary["container_type"] != "carton":
+            continue
+
+        # Find inv_primary's co-packed secondary (must come after i)
+        inv_secondary = None
+        for j in range(i + 1, len(label_groups)):
+            g2 = label_groups[j]
+            if ("co_packed_secondary" in g2.get("flags", [])
+                    and g2.get("co_packed_parent") == inv_primary["base_part"]):
+                inv_secondary = (j, g2)
+                break
+        if inv_secondary is None:
+            continue
+        j_sec, inv_sec_group = inv_secondary
+
+        # Find the original primary: a NON-secondary group at index < i
+        # whose base_part == inv_sec_group["base_part"]
+        orig_primary = None
+        orig_primary_idx = None
+        for k in range(i):
+            g2 = label_groups[k]
+            if (g2["base_part"] == inv_sec_group["base_part"]
+                    and "co_packed_secondary" not in g2.get("flags", [])
+                    and "nonstd_remainder" not in g2.get("flags", [])
+                    and g2["container_type"] == "carton"):
+                orig_primary = g2
+                orig_primary_idx = k
+                break
+        if orig_primary is None:
+            continue
+
+        # Find the original secondary: a co_packed_secondary whose
+        # co_packed_parent == orig_primary["base_part"]
+        # AND whose base_part == inv_primary["base_part"]
+        orig_sec = None
+        for k in range(len(label_groups)):
+            g2 = label_groups[k]
+            if (k != i
+                    and "co_packed_secondary" in g2.get("flags", [])
+                    and g2.get("co_packed_parent") == orig_primary["base_part"]
+                    and g2["base_part"] == inv_primary["base_part"]):
+                orig_sec = g2
+                break
+        if orig_sec is None:
+            continue
+
+        # All checks passed — reconcile.
+        n_inv = inv_primary["num_labels"]
+        new_total = orig_primary["num_labels"] + n_inv
+
+        # 1. Grow the original primary's count
+        orig_primary["num_labels"]   = new_total
+        orig_primary["total_labels"] = new_total
+
+        # 2. Update original secondary total to include the remainder boxes
+        orig_sec["num_labels"]   = orig_sec["num_labels"] + n_inv
+        orig_sec["total_labels"] = orig_sec["total_labels"] + n_inv
+
+        # 3. If the inverted primary's pcs differs from the original secondary's
+        #    standard pcs, record a nonstd_remainder on the original secondary.
+        #    nonstd_box_num = secondary's final total (computed above in step 2).
+        #    nonstd_copies  = 5 (NON-STD labels always print 5 copies).
+        if inv_primary["pcs_per_box"] != orig_sec["pcs_per_box"]:
+            orig_sec.setdefault("nonstd_remainders", []).append({
+                "nonstd_box_num": orig_sec["num_labels"],
+                "nonstd_pcs":     inv_primary["pcs_per_box"],
+                "nonstd_copies":  5,
+            })
+            if "has_nonstd_remainder" not in orig_sec["flags"]:
+                orig_sec["flags"].append("has_nonstd_remainder")
+
+        # 4. Remove the two inverted groups
+        to_remove.add(i)
+        to_remove.add(j_sec)
+
+    label_groups = [g for k, g in enumerate(label_groups) if k not in to_remove]
+
 
     # ── Post-process step 1: consolidate scattered same-part rows ─────────
     # Parts that appear in multiple non-consecutive runs (e.g. same PN spread
