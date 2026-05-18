@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Packing Slip Review
-// review.php v1.44
+// review.php v1.47
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!DOCTYPE html>
@@ -441,6 +441,7 @@ function buildRow(g, rowNum, fname) {
   if (g.flags) {
     if (g.flags.includes('co_packed_secondary')) flags += '<span class="badge badge-copacked">Co-pack</span>';
     if (g.flags.includes('t013_prepped'))        flags += '<span class="badge badge-t013">T013</span>';
+    if (g.flags.includes('has_nonstd_remainder')) flags += '<span class="badge" style="background:#e8f0ff;color:#1a4a9e;font-size:9px;">+NON-STD</span>';
   }
 
   const revStr = g.revision ? `<span style="font-size:10px;color:#888;margin-left:4px;">rev ${esc(g.revision)}</span>` : '';
@@ -451,18 +452,25 @@ function buildRow(g, rowNum, fname) {
   tr.dataset.rownum = rowNum;
   tr.id = rowId;
 
-  // Look for a nonstd_remainder sibling with the same base_part immediately after
+  // Look for non-standard remainder info — two sources:
+  //   (a) legacy: a sibling row with flags:['nonstd_remainder'] immediately after
+  //   (b) inline: g.nonstd_remainders[] array on this group (has_nonstd_remainder)
   const allGroups = (slipData[fname] || {}).label_groups || [];
   const myIdx     = rowNum - 1; // 0-based index of this group
   const nsSibling = (allGroups[myIdx + 1]?.flags?.includes('nonstd_remainder')
                      && allGroups[myIdx + 1]?.base_part === g.base_part)
                     ? allGroups[myIdx + 1] : null;
+  // Inline nonstd_remainders (e.g. co_packed_secondary with has_nonstd_remainder)
+  const nsInline  = (g.flags?.includes('has_nonstd_remainder') && Array.isArray(g.nonstd_remainders) && g.nonstd_remainders.length)
+                    ? g.nonstd_remainders : null;
 
-  // Total shown for main row — if nonstd sibling exists, show full merged total
+  // Total shown for main row — include all nonstd boxes in count
   const stdBoxes   = g.num_labels;
   const displayTotal = nsSibling
     ? (nsSibling.nonstd_box_num || (stdBoxes + nsSibling.num_labels)) * lpu
-    : g.total_labels;
+    : nsInline
+      ? g.total_labels
+      : g.total_labels;
 
   tr.innerHTML = `
     <td style="color:#999;font-size:12px;">${rowNum}</td>
@@ -531,6 +539,45 @@ function buildRow(g, rowNum, fname) {
         <td></td>
       </tr>`;
     frag.appendChild(tempDiv.firstElementChild);
+    return frag;
+  }
+
+  // Inline nonstd_remainders (co_packed_secondary with has_nonstd_remainder)
+  // NON-STD sub-rows are rendered BEFORE the standard row so they print first.
+  if (nsInline) {
+    const frag = document.createDocumentFragment();
+    nsInline.forEach((ns, nsI) => {
+      const nsId  = `${rowId}-inline-ns-${nsI}`;
+      const nsCopies = ns.nonstd_copies || 1;
+      const tempDiv = document.createElement('tbody');
+      tempDiv.innerHTML = `
+        <tr class="nonstd-subrow" id="${nsId}-tr">
+          <td style="color:#bbb;font-size:11px;padding-left:24px;">↳</td>
+          <td style="color:#888;font-size:11px;">non-std box</td>
+          <td style="font-family:monospace;font-size:11px;color:#555;white-space:nowrap;">
+            ${esc(g.base_part || g.part_number)}${revStr}
+            <span class="badge" style="background:#e8f0ff;color:#1a4a9e;margin-left:4px;font-size:9px;">Non-std box</span>
+          </td>
+          <td><span class="badge badge-carton" style="opacity:.6;">Carton</span></td>
+          <td style="text-align:right;">
+            box <strong>${ns.nonstd_box_num}</strong> of <strong>${g.total_labels}</strong>
+          </td>
+          <td style="text-align:right;">
+            <input class="inline-edit" type="number" min="1"
+                   id="${nsId}-pcs"
+                   value="${ns.nonstd_pcs || ''}"
+                   placeholder="—"
+                   oninput="markChanged(this)">
+            <span style="font-size:10px;color:#999;margin-left:2px;">pcs</span>
+          </td>
+          <td style="text-align:right;font-size:11px;color:#aaa;">× ${nsCopies} cop${nsCopies === 1 ? 'y' : 'ies'}</td>
+          <td style="text-align:right;font-size:12px;color:#888;">${nsCopies}</td>
+          <td></td>
+        </tr>`;
+      frag.appendChild(tempDiv.firstElementChild);
+    });
+    // Standard row appended AFTER nonstd sub-rows so nonstd prints first
+    frag.appendChild(tr);
     return frag;
   }
 
@@ -604,12 +651,17 @@ function boxCountForGroup(g, allGrps, safeFname, rowNum) {
   if (g.container_type !== 'carton') return 0;
   if (g.flags?.includes('nonstd_remainder')) return 0;
   const myIdx = allGrps.indexOf(g);
-  const ns = (allGrps[myIdx + 1]?.flags?.includes('nonstd_remainder')
-              && allGrps[myIdx + 1]?.base_part === g.base_part)
-             ? allGrps[myIdx + 1] : null;
+  const nsSib = (allGrps[myIdx + 1]?.flags?.includes('nonstd_remainder')
+                 && allGrps[myIdx + 1]?.base_part === g.base_part)
+               ? allGrps[myIdx + 1] : null;
+  // Inline nonstd_remainders: total_labels already includes nonstd boxes
+  const nsInline = (g.flags?.includes('has_nonstd_remainder') && Array.isArray(g.nonstd_remainders) && g.nonstd_remainders.length)
+                   ? g.nonstd_remainders : null;
   const liveUnits = parseInt(document.getElementById(`row-${safeFname}-${rowNum}-units`)?.value);
   const units = (!isNaN(liveUnits) && liveUnits > 0) ? liveUnits : g.num_labels;
-  return ns ? (ns.nonstd_box_num || (units + (ns.num_labels || 1))) : units;
+  if (nsSib)    return nsSib.nonstd_box_num || (units + (nsSib.num_labels || 1));
+  if (nsInline) return g.total_labels; // total_labels includes all nonstd boxes
+  return units;
 }
 
 // refreshSerialRanges: assigns sequential serial ranges to every row,
@@ -697,21 +749,35 @@ function buildPreviewParams(g, meta, naVal, units, pcs, seqStart, safeFnameCtx) 
     if (g.revision) p.set('revision', g.revision);
     if (g.flags && g.flags.includes('t013_prepped')) p.set('t013_prepped', '1');
 
-    // Check for nonstd_remainder sibling (same base_part, next group)
-    const allGrps = _allGrpsResolved;
-    const gIdx    = allGrps.indexOf(g);
-    const nsSib   = (gIdx >= 0
-                     && allGrps[gIdx + 1]?.flags?.includes('nonstd_remainder')
-                     && allGrps[gIdx + 1]?.base_part === g.base_part)
-                    ? allGrps[gIdx + 1] : null;
+    // Check for nonstd_remainder sibling (legacy) or inline nonstd_remainders[]
+    const allGrps  = _allGrpsResolved;
+    const gIdx     = allGrps.indexOf(g);
+    const nsSib    = (gIdx >= 0
+                      && allGrps[gIdx + 1]?.flags?.includes('nonstd_remainder')
+                      && allGrps[gIdx + 1]?.base_part === g.base_part)
+                     ? allGrps[gIdx + 1] : null;
+    const nsInline = (g.flags?.includes('has_nonstd_remainder') && Array.isArray(g.nonstd_remainders) && g.nonstd_remainders.length)
+                     ? g.nonstd_remainders : null;
 
     if (nsSib) {
+      // Legacy sibling-row nonstd
       const nsBoxNum = nsSib.nonstd_box_num || (units + nsSib.num_labels);
       const rowId    = `row-${safeFnameCtx}-${gIdx + 1}`;
       const nsPcs    = parseInt(document.getElementById(`${rowId}-ns-pcs`)?.value) || nsSib.pcs_per_box || 0;
       const nsCopies = nsSib.nonstd_copies || 5;
       p.set('total_boxes', nsBoxNum.toString());
       p.set('nonstd_json', JSON.stringify([{ box: String(nsBoxNum), qty: String(nsPcs), copies: String(nsCopies) }]));
+    } else if (nsInline) {
+      // Inline nonstd_remainders[] — build nonstd_json from the array.
+      // NON-STD labels print first; preview.php processes nonstd_json before std labels.
+      const totalBoxes = g.total_labels;
+      const nsJsonArr  = nsInline.map((ns, nsI) => {
+        const nsId  = `row-${safeFnameCtx}-${gIdx + 1}-inline-ns-${nsI}`;
+        const nsPcs = parseInt(document.getElementById(`${nsId}-pcs`)?.value) || ns.nonstd_pcs || 0;
+        return { box: String(ns.nonstd_box_num), qty: String(nsPcs), copies: String(ns.nonstd_copies || 1) };
+      });
+      p.set('total_boxes', String(totalBoxes));
+      p.set('nonstd_json', JSON.stringify(nsJsonArr));
     } else {
       p.set('total_boxes', units.toString());
     }
@@ -755,6 +821,6 @@ function renderResults(data) {
   renderResultsCore(data);
 }
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.44 &middot; review</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.47 &middot; review</div>
 </body>
 </html>
