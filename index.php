@@ -1,6 +1,6 @@
 <?php
 // Lake Forest Industries — Warehouse Label Generator
-// index.php v1.44
+// index.php v1.47
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -346,6 +346,6 @@ function buildNonstdParams() {
 // Initialize with one empty non-standard row on page load
 addNonstdRow();
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.44 &middot; index</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.47 &middot; index</div>
 </body>
 </html>
