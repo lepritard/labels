@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.47)
+parse_packing_slip.py  —  Evolved packing slip parser (v2, v1.48)
 
 Reads a New Arch ENTERPRISE packing slip .xlsx (Sheet2) and returns
 structured JSON describing every label group to be printed.
