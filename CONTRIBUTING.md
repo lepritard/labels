@@ -12,6 +12,53 @@ This guide covers everything a new developer needs to understand, modify, and ex
 
 ---
 
+
+## Local Dev Environment
+
+### Stack Requirements
+
+- PHP 7.4+ (8.x recommended)
+- Python 3.10+
+- A local web server: XAMPP, Laragon, or `php -S localhost:8080`
+
+### Python / parse_slip.php Bridge
+
+`parse_slip.php` calls `parse_packing_slip.py` via `shell_exec()`. This is the **most environment-sensitive part of the stack**. If label generation silently produces no output, the bridge is almost always the cause.
+
+**Debugging steps:**
+
+1. Add a temporary line to `parse_slip.php` and check your PHP error log:
+   ```php
+   error_log(shell_exec('which python3 2>&1'));
+   ```
+   Empty output means PHP's subprocess PATH doesn't include Python.
+
+2. **Hardcode the Python path** in `parse_slip.php`:
+   ```php
+   // Windows (XAMPP)    $python = 'C:\\Python311\\python.exe';
+   // macOS (Homebrew)   $python = '/opt/homebrew/bin/python3';
+   // macOS (system)     $python = '/usr/local/bin/python3';
+   // Linux              $python = '/usr/bin/python3';
+   ```
+
+3. On Windows, check `php.ini` for `disable_functions` — remove `shell_exec` if listed.
+
+4. Verify pip packages are installed under the *same* Python binary PHP is using:
+   ```bash
+   /path/to/python3 -m pip install openpyxl
+   ```
+
+5. Run the parser directly to confirm it works outside PHP:
+   ```bash
+   python3 parse_packing_slip.py /path/to/PACKING-PO12345.xlsx
+   ```
+
+### preview.php — Logo Embedding (Do Not Change)
+
+`preview.php` embeds the company logo as a **base64 `<img>` tag on every label**. **Do not change this to SVG `<symbol>`/`<use>`.**
+
+Chrome's PDF renderer does not resolve `<symbol>`/`<use>` cross-references when generating PDFs — logos render blank. This was tested in v1.49 and reverted in v1.49. Base64 `<img>` is the correct, tested approach. See `ARCHITECTURE.md`.
+
 ## Code Map
 
 ### `parse_packing_slip.py`
