@@ -1,0 +1,2195 @@
+{
+  "A17914": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "A23968": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "APS": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A26916"
+    ],
+    "conflicts": []
+  },
+  "B22519-32": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "B22519-34": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "B22519-40": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "B22519-42": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      40
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "B22519-50": {
+    "customer": "Avtron Power Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      40
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "0950": {
+    "customer": "Berryman Products",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "1300-1": {
+    "customer": "Berryman Products",
+    "container_type": "carton",
+    "std_qtys": [
+      150
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "2640": {
+    "customer": "Berryman Products",
+    "container_type": "carton",
+    "std_qtys": [
+      500
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "499PP": {
+    "customer": "Berryman Products",
+    "container_type": "carton",
+    "std_qtys": [
+      160
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "10-000014-11": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      45,
+      60
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "10-100500-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      110,
+      130,
+      135
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "10-100529-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      20,
+      45,
+      120
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "10-100530-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      500,
+      525
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "10-100531-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      500,
+      525
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "10-100534-34": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      200,
+      225,
+      300
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "10-100579-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      100,
+      125,
+      200
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "10-100580-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      500,
+      525
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "10-100581-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      230,
+      255,
+      270
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "10-100588-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      500,
+      525
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "10-100655-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      1000,
+      1050
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "10-100663-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      500,
+      525
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "10-100733-00": {
+    "customer": "Jersey Jack Pinball",
+    "container_type": "carton",
+    "std_qtys": [
+      125,
+      400,
+      500
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A1"
+    ],
+    "conflicts": []
+  },
+  "400009838": {
+    "customer": "LAB2FAB",
+    "container_type": "carton",
+    "std_qtys": [
+      2
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "1.1022": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "1.1173": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      250,
+      500
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1.1570": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "P"
+    ],
+    "conflicts": []
+  },
+  "1.1830": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      1000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1.1945": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1.1946": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1.1951": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1.1952": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1.1955": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1.1956": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1.1957": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "1.1958": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1110-SSS-001-LH": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "1110-SSS-001-RH": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "1110-SSS-002": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "1110-SSS-004": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      18,
+      82
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "1111-223": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      2
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "1111-260-04": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "1112-SSS-001-LH": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1112-SSS-001-RH": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "1112-SSS-002": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "1112-SSS-003-2": {
+    "customer": "Middleby Coffee Solutions",
+    "container_type": "carton",
+    "std_qtys": [
+      4,
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "SD30KDLF": {
+    "customer": "Stericycle",
+    "container_type": "carton",
+    "std_qtys": [
+      1
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "047539": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      200,
+      203,
+      250
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "056132": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      64,
+      160
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "056628": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      144
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "056649": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      562,
+      600,
+      777
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "082897": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      60
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "085477": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      110,
+      280
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "TAY": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      1,
+      2
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "X85946"
+    ],
+    "conflicts": []
+  },
+  "X84224": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "X84225": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "X84325": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      36
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "X85744": {
+    "customer": "Taylor Company",
+    "container_type": "carton",
+    "std_qtys": [
+      2
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "CT-101250-0": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      300
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "CT-103072": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      80,
+      300
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "CT-103514": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      3000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "CT-103664": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "1"
+    ],
+    "conflicts": []
+  },
+  "CT-103761": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      24,
+      25,
+      26
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "1"
+    ],
+    "conflicts": []
+  },
+  "CT-103815": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      3,
+      24
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "CT-104546": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "2"
+    ],
+    "conflicts": []
+  },
+  "ECO-9109": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ECO-9378": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10,
+      11,
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "ECO-9447": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECO-9447-T013": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECO-9530": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      4
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECO-9531": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECO-9531-T013": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECO-9532": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECO-9573": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20,
+      30,
+      40
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECO-9584": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ECS-9115-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4,
+      7,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9331": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      1000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "ECS-9388": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      60
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9390": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECS-9396": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      30
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9397": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      30
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A",
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9461": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      40
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "ECS-9562": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B1"
+    ],
+    "conflicts": []
+  },
+  "ECS-9586-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10,
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9587": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9800": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      12,
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECS-9800-T013": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ECS-9802": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ECS-9806": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      80,
+      120,
+      160,
+      165,
+      200
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "ECS-9853": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "ECS-9890": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4,
+      24
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9891": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ECS-9895": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      8,
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "ENC-1321": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      16
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ENC-1322": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "ENC-1655": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ENC-1724": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      6,
+      12
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ENC-1725": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "ENC-1726": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "ENC-1729": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "ENC-1738": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      13,
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ENC-1739": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ENC-1757": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      470,
+      1000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ENC-1767": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      300
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "ENC-1773-T004": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      45
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "ENC-1833": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      3,
+      6,
+      10
+    ],
+    "nonstd_qtys": [
+      2
+    ],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "ENC-1909": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "FRE-1066": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      400
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "FRE-1160": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      8,
+      12
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "FRE-1200": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      180
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [],
+    "conflicts": []
+  },
+  "HCS-4459-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      8
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HCS-4459-2": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HCT-4059-3": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      8
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HCT-4449-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HCW-4449-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      1,
+      4,
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHB-8117": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "G"
+    ],
+    "conflicts": []
+  },
+  "HHD-8104-3": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      12
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "G"
+    ],
+    "conflicts": []
+  },
+  "HHD-8254-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHD-8258-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4,
+      6
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "HHD-8271-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "HHD-8272-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "HHD-8375": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8376": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8378": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      68,
+      72
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8379": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      72
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8418-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      480
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHD-8587": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8596": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      12
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "H"
+    ],
+    "conflicts": []
+  },
+  "HHD-8616": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      470,
+      500
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "HHD-8620-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8643": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      8,
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "HHD-8680-1": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHD-8738": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      18,
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "HHD-8740": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      43,
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "HHD-8762": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      700,
+      800
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHD-8763": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      700,
+      800
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHS-8379": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      17
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "HHS-8388": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I1-9716": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      36
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I1-9826": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I1-9846": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      19,
+      24,
+      71,
+      72,
+      80,
+      100,
+      160,
+      200
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I1-9851": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      68,
+      72
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "I1-9896": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "I1-9958": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      230,
+      281
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I3-9109-2": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "I3-9252": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      10
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I3-9301": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4,
+      11,
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "I3-9302": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      7,
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "I5-9086": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      30
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9179": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      14,
+      26
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9184": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      1728,
+      1730,
+      2590
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9196": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      120,
+      140
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "I5-9224": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      50
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I5-9263": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      40
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "I5-9272": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      460
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I5-9295": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9301": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "G"
+    ],
+    "conflicts": []
+  },
+  "I5-9302": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      14
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "G"
+    ],
+    "conflicts": []
+  },
+  "I5-9313": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10,
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "I5-9314": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      10,
+      15
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9326": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      68,
+      72,
+      73,
+      74
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9327": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      68,
+      70,
+      72
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9331": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      3500
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9333": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  },
+  "I5-9336": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      50,
+      100
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I5-9370": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      66,
+      68
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I5-9379": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      25
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "I5-9393": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      677
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "D"
+    ],
+    "conflicts": []
+  },
+  "I5-9394": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      680
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "NGC-1194": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2000
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "A"
+    ],
+    "conflicts": []
+  },
+  "NGC-1478": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      28
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "E"
+    ],
+    "conflicts": []
+  },
+  "NGC-3017": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      2,
+      8
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "F"
+    ],
+    "conflicts": []
+  },
+  "TW-I1-9896": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      5,
+      20
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "C"
+    ],
+    "conflicts": []
+  },
+  "TW-I1-9988": {
+    "customer": "TurboChef",
+    "container_type": "carton",
+    "std_qtys": [
+      4
+    ],
+    "nonstd_qtys": [],
+    "revisions_seen": [
+      "B"
+    ],
+    "conflicts": []
+  }
+}
