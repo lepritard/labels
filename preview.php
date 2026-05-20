@@ -1,5 +1,5 @@
 <?php
-// preview.php v1.47
+// preview.php v1.49.3
 function h($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 function format_date($d) {
   $ts = strtotime($d);
@@ -7,23 +7,39 @@ function format_date($d) {
   return date('F j, Y', $ts);
 }
 
+// Logo: base64 <img> per label (v1.47 behaviour, restored in v1.49).
+// The logo file is assets/logo.svg — embedded as image/svg+xml data URI.
+// DO NOT switch to SVG <symbol>/<use>: Chrome's PDF renderer does not resolve
+// those references when printing to PDF — logos render blank. See ARCHITECTURE.md.
 $logo_path = __DIR__ . '/assets/logo.svg';
-$logo_data = '';
+$logo_img  = '';
 if (file_exists($logo_path)) {
-  $logo_data = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($logo_path));
+  $logo_data = base64_encode(file_get_contents($logo_path));
+  $logo_img  = '<img src="data:image/svg+xml;base64,' . $logo_data
+             . '" class="bl-logo" alt="Lake Forest Industries">';
 }
+$logo_img_pallet = $logo_img
+  ? str_replace('class="bl-logo"', 'class="pl-logo"', $logo_img)
+  : '';
 
 $type          = $_GET['type'] ?? 'box';
 $customer      = trim($_GET['customer'] ?? '');
 $na_number     = trim($_GET['na_number'] ?? '');
-$received_date = format_date($_GET['received_date'] ?? date('Y-m-d'));
-$raw_date      = $_GET['received_date'] ?? date('Y-m-d');
-$serial_prefix = date('y', strtotime($raw_date)) . sprintf('%03d', date('z', strtotime($raw_date)) + 1);
+$raw_date      = trim($_GET['received_date'] ?? '');
+$seq_start_raw = isset($_GET['seq_start']) ? intval($_GET['seq_start']) : 1;
+$omit_serial   = ($seq_start_raw === 0); // seq_start=0 → suppress serial + received date
+// Only set received_date when serial tags are active; otherwise leave blank
+if (!$omit_serial) {
+  if ($raw_date === '') $raw_date = date('Y-m-d'); // fallback to today only when serials are on
+  $received_date = format_date($raw_date);
+  $serial_prefix = date('y', strtotime($raw_date)) . sprintf('%03d', date('z', strtotime($raw_date)) + 1);
+} else {
+  $received_date = '';
+  $serial_prefix = '';
+}
 $copies        = max(1, intval($_GET['copies'] ?? 1));
 
 $part_number   = trim($_GET['part_number'] ?? '');
-$seq_start_raw = isset($_GET['seq_start']) ? intval($_GET['seq_start']) : 1;
-$omit_serial   = ($seq_start_raw === 0);          // seq_start=0 → suppress serial on label
 $omit_customer = !empty($_GET['omit_customer']); // omit_customer=1 → hide Customer: line (e.g. FRE parts)
 $seq_start     = $omit_serial ? 1 : max(1, $seq_start_raw);
 $total_boxes   = max(1, intval($_GET['total_boxes'] ?? 1));
@@ -160,7 +176,7 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   flex: 0 0 auto;
 }
 .bl-logo {
-  display: block; height: 0.88in; width: auto; max-width: none; max-height: none; object-fit: contain;
+  display: block; height: 0.88in; width: auto; max-width: none; max-height: none; overflow: visible;
 }
 
 /* Non-standard (mirrored) label */
@@ -200,11 +216,12 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   height: 0.88in; min-height: 0.88in; display: flex; align-items: flex-end; justify-content: flex-end;
   flex: 0 0 auto;
 }
-.pl-logo { display: block; height: 0.88in; width: auto; max-width: none; max-height: none; object-fit: contain; }
+.pl-logo { display: block; height: 0.88in; width: auto; max-width: none; max-height: none; overflow: visible; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
+<?php /* logo_symbol removed v1.49 — using per-label base64 <img> */ ?>
 <button class="print-btn" onclick="window.print()">🖨️ Print Labels</button>
 <?php if ($type === 'box'):
   $pages = [];
@@ -255,13 +272,15 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   </div>
   <div class="bl-footer">
     <div class="bl-footer-left">
+<?php if (!$omit_serial && $received_date !== ''): ?>
       <div class="bl-received">Received:<br><?php echo h($received_date); ?></div>
+<?php endif; ?>
 <?php if (!$omit_serial): ?>
       <svg id="<?php echo $sbc; ?>" class="bl-serial-barcode"></svg>
       <div class="bl-serial-number"><?php echo h($serial); ?></div>
 <?php endif; ?>
     </div>
-    <?php if ($logo_data): ?><div class="bl-logo-wrap"><img src="<?php echo $logo_data; ?>" class="bl-logo" alt="Lake Forest Industries"></div><?php endif; ?>
+    <?php if ($logo_img): ?><div class="bl-logo-wrap"><?php echo $logo_img; ?></div><?php endif; ?>
   </div>
 </div></div>
 <script>
@@ -311,8 +330,10 @@ body { background: #666; font-family: Arial, Helvetica, sans-serif; padding: 20p
   <?php endif; ?>
   </div>
   <div class="pl-footer">
+<?php if ($received_date !== ''): ?>
     <div class="pl-received">Received:<br><?php echo h($received_date); ?></div>
-    <?php if ($logo_data): ?><div class="pl-logo-wrap"><img src="<?php echo $logo_data; ?>" class="pl-logo" alt="Lake Forest Industries"></div><?php endif; ?>
+<?php endif; ?>
+    <?php if ($logo_img_pallet): ?><div class="pl-logo-wrap"><?php echo $logo_img_pallet; ?></div><?php endif; ?>
   </div>
 </div></div>
 <script>
