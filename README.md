@@ -53,6 +53,65 @@ A local PHP web application that generates printable box and pallet labels for i
 
 ---
 
+
+## Prerequisites / Environment Setup
+
+### Python
+
+`parse_packing_slip.py` is called by PHP via `shell_exec()`. Python must be installed and reachable by the web server process.
+
+**Required pip packages:**
+```
+pip install openpyxl
+```
+
+#### Windows 11
+
+- Install Python 3.10+ from [python.org](https://www.python.org/downloads/) — **not** the Microsoft Store stub (the Store version does not work reliably with `shell_exec()`).
+- During installation, check **"Add Python to PATH"**.
+- If your server runs under Apache/XAMPP, the PATH available to PHP's subprocess may differ from your terminal PATH. Hardcode the Python path in `parse_slip.php` if needed:
+  ```php
+  $python = 'C:\\Python311\\python.exe';
+  ```
+
+#### macOS
+
+- `python` may point to Python 2 or a no-op stub. Use `python3`.
+- Homebrew Python is typically at `/opt/homebrew/bin/python3`; system Python at `/usr/local/bin/python3`.
+- Web server processes (Apache, nginx) may not inherit your terminal PATH. Hardcode if `shell_exec()` returns empty output:
+  ```php
+  $python = '/opt/homebrew/bin/python3';
+  ```
+
+#### Linux
+
+- `python3` is usually `/usr/bin/python3`. Confirm with `which python3`.
+- The web server user (`www-data` or equivalent) must have read access to the script.
+
+---
+
+## Known Parts Autocomplete
+
+`known_parts.json` must live in the **same directory as `index.php`** on your server. PHP loads it at page load:
+
+```php
+$known_parts = json_decode(file_get_contents(__DIR__ . '/known_parts.json'), true) ?? [];
+```
+
+The decoded array is embedded as an inline JS constant (`KP`) — autocomplete works with zero AJAX requests.
+
+**Customer / Part cascade:** Typing a customer filters the Part Number suggestions to that customer's known parts. Typing a Part Number reverse-populates the Customer field if the part is found in `KP`.
+
+**Qty smart-fill:** If a part has one known standard qty, the Qty field pre-fills. If it has multiple, a dropdown appears. Entering an unrecognised qty triggers an inline warning banner.
+
+### Rebuilding known_parts.json
+
+```bash
+python3 build_known_parts.py --input ./packing-slip-exports/ --output ./known_parts.json
+```
+
+Run this whenever you want the autocomplete data to reflect new shipment history.
+
 ## Usage
 
 ### Opening the App
@@ -83,9 +142,9 @@ Navigate to the app URL in any browser on your network. The main form has two ta
 ```
 lf-labels/
 ├── index.php               # Main entry form (UI)
-├── review.php              # Packing slip upload & review UI (v1.47)
-├── parse_slip.php          # PHP → Python parser bridge (v1.47)
-├── parse_packing_slip.py   # Python packing slip parser (v1.47)
+├── review.php              # Packing slip upload & review UI (v1.49)
+├── parse_slip.php          # PHP → Python parser bridge (v1.49)
+├── parse_packing_slip.py   # Python packing slip parser (v1.49)
 ├── preview.php             # Label renderer (outputs printable HTML)
 ├── README.md               # This file
 └── assets/
