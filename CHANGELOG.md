@@ -1,11 +1,65 @@
 # Changelog — LF Label Generator
 
+## [1.49.3] – 2026-05-19
+
+### Fixed
+- `preview.php` — logo completely missing from rendered output. During the v1.48→v1.49 revert, the logo path was incorrectly changed from `assets/logo.svg` to `assets/logo.png` (the file on the server is an SVG), and the MIME type was set to `image/png` instead of `image/svg+xml`. Both errors meant `file_exists()` returned false and `$logo_img` was always `''`. Fixed: path restored to `assets/logo.svg`, MIME type corrected to `image/svg+xml`.
+- `index.php`, `review.php` — version footer strings updated to `v1.49.3`.
+
+
+## [1.49.2] – 2026-05-19
+
+### Fixed
+- `preview.php` — Received Date was printed on every label even when Starting Sequence # was `0` (serial tags disabled). Root cause: `$received_date` defaulted to `date('Y-m-d')` (today) regardless of `seq_start`, and the `Received:` line was rendered outside the `$omit_serial` guard.
+  - `$received_date` is now set to `''` when `$omit_serial` is true; the today-fallback only applies when serial tags are active
+  - Both the box-label and pallet-label `Received:` lines are now wrapped in guards — box labels use `!$omit_serial && $received_date !== ''`, pallet labels use `$received_date !== ''`
+- `index.php`, `review.php` — version footer strings updated to `v1.49.2`
+
+
+## [1.49.1] – 2026-05-19
+
+### Fixed
+- `known_parts.json` — trailing comma after the last entry caused a JSON parse error; PHP's `json_decode()` returned `null`, so `KP` was embedded as an empty object `{}` in the page and all autocomplete was silently non-functional. Comma removed; file now passes strict JSON validation.
+- `index.php`, `preview.php`, `review.php` — version footer strings still read `v1.48`; updated to `v1.49`.
+
+
+## [1.49] – 2026-05-19
+
+### Added
+- `index.php` — Customer / Part Number **autocomplete cascade** powered by `known_parts.json`
+  - `known_parts.json` lives in the same directory as `index.php`; PHP loads it at page load via `file_get_contents(__DIR__ . '/known_parts.json')` and embeds it as inline JS constant `KP` — zero AJAX, no extra round-trips
+  - Customer field gets a `<datalist>` of all known customers; typing narrows the Part Number datalist to that customer's parts only
+  - Selecting/typing a Part Number reverse-populates Customer when the part is found in `KP`
+  - Autofilled fields receive a subtle green border so the operator can see what was populated automatically
+  - Graceful degradation: if `known_parts.json` is missing or malformed, all fields fall back to plain text inputs with no errors
+- `index.php` — **Qty smart-fill / dropdown** driven by `known_parts.json`
+  - 1 known `std_qty` → Qty field pre-fills and stays editable
+  - 2+ known `std_qtys` → Qty field becomes a `<select>` with all known values plus an *Other…* option that swaps back to a free-type input
+  - Entering a qty not in `std_qtys` triggers a yellow inline warning banner with **Yes — add as NON-STD box**, **No — use as standard**, and **Dismiss** options
+- `index.php` — Shipment ID field is now **optional** (`required` removed)
+- `index.php` — Received Date now **hidden by default**; animates into view only when Starting Sequence # ≥ 1
+- `index.php` — Starting Sequence # **defaults to `0`**; hint explains that entering ≥ 1 enables serial tags and Received Date
+- `known_parts.json` — **now included in the release zip** (must live in the same directory as `index.php`)
+- `build_known_parts.py` — new helper script to rebuild `known_parts.json` from historical packing-slip JSON exports
+- `README.md` — new **Prerequisites / Environment Setup** section: Python on Windows 11, macOS, Linux; `shell_exec()` PATH caveats; required pip packages
+- `README.md` — new **Known Parts Autocomplete** section and updated Project Structure table
+- `CONTRIBUTING.md` — new **Local Dev Environment** section with Python / `parse_slip.php` bridge debugging tips
+- `CONTRIBUTING.md` — Code Map updated; `preview.php` logo note warns against `<symbol>`/`<use>` revert
+- `ARCHITECTURE.md` — Design Decisions Log: Python/openpyxl rationale, `shell_exec()` sensitivity note, logo embedding history
+
+### Changed
+- `preview.php` — **Reverts v1.48 SVG optimisation** back to per-label base64 `<img>` (v1.47 behaviour)
+  - v1.48 used `<symbol>` + `<use>` to reduce HTML size; Chrome's PDF renderer does not resolve `<symbol>`/`<use>` references → logos were blank in all Chrome-produced PDFs
+  - Base64 `<img>` is slightly larger HTML but renders correctly in every environment tested
+
+
 All notable changes to this project are documented here in reverse-chronological order.
 
 ---
 
 | Version | Date | Changes |
 |---------|------|---------|
+| **v1.48** | **2026-05-19** | **`preview.php`: logo now embedded once per page using SVG `<symbol>` + `<use>` instead of a repeated base64 `data:` URI on every label. PHP reads `assets/logo.svg`, extracts the `viewBox`, strips the outer `<svg>` tags, wraps the inner content in a hidden `<symbol id="lf-logo">` block, and injects it once after `<body>`. Every label references it with `<svg><use href="#lf-logo"/></svg>` (~50 bytes) instead of the full base64 string (~4 KB+) repeated per label. No changes to any other file; no functional changes to label output.** |
 | **v1.47** | **2026-05-18** | **Bugfix for v1.46 nonstd_remainders values. (1) `parse_packing_slip.py`: in the inverted co-pack reconciliation, `nonstd_box_num` was incorrectly set to the primary's count (170) instead of the secondary's final total (339). Fixed by moving the `nonstd_remainders` append to after the secondary total is updated. (2) `nonstd_copies` was set to `n_inv` (number of inverted boxes, typically 1) instead of the correct fixed value of 5. (3) `review.php`: main row for `has_nonstd_remainder` groups now shows a `+NON-STD` badge so the non-standard box is visible without expanding the sub-row.** |
 | **v1.46** | **2026-05-18** | **`review.php`: rendering support for `has_nonstd_remainder` / `nonstd_remainders[]` on co-packed secondary groups. `renderRow` now generates NON-STD sub-rows from the inline `nonstd_remainders` array (rendered *before* the standard row so NON-STD labels print first). `boxCountForGroup` updated to return `total_labels` for `has_nonstd_remainder` groups (which already includes nonstd boxes). `buildPreviewParams` extended to build `nonstd_json` from `nonstd_remainders[]` when no legacy sibling row exists. No changes to `parse_packing_slip.py`, `parse_slip.php`, or `preview.php`.** |
 | **v1.45** | **2026-05-18** | **Parser: three fixes. (1) Inverted co-pack reconciliation (post-process step 0): when the supplier lists a remainder co-packed carton with part order reversed, the parser detects the symmetric pair by index-bounded scan and merges the remainder into the original primary's count, attaching a `nonstd_remainders` entry on the secondary for any differing pcs quantity. (2) col A lookback for secondary pcs: `flush_secondary` now searches the primary row's col A description text for the secondary part number's pcs when the EXCEPTIONS table has no entry, so quantities encoded in merged cells are captured directly. (3) CUSTOMER_MAP corrections: `IB` -> `DAWGS`, `NGC` -> `TurboChef`, `HCW` -> `TurboChef`. PHP files and README version strings bumped; no logic changes to PHP.** |
