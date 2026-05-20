@@ -149,13 +149,52 @@ JsBarcode is loaded from CDN and invoked once per label via a per-element IIFE a
 
 ---
 
+
 ## Design Decisions Log
 
-| Decision | Rationale |
-|---|---|
-| Python for parsing, not PHP | `openpyxl` is significantly more capable than PHP's xlsx libraries for reading complex Excel files. The exec() bridge adds one process fork per upload — acceptable for a warehouse tool used a few times per shift. |
-| XMLHttpRequest over fetch() | XAMPP + Chromium localhost bug; see v1.23. |
-| No database | Simplicity and zero-setup deployment. Serial tracking is the one area where persistence would add real value (see Roadmap). |
-| All label params in URL | Makes every print job fully reproducible from the URL alone. The downside is URL length — not an issue for local use. |
-| `nonstd_remainder` flag on second row, not first | The parent row drives the Print button and serial allocation. Making the second row the flagged sub-row keeps the parent's `num_labels` correct and avoids touching the first row's data. |
-| `copies=5` hardcoded for nonstd | Warehouse process requirement. Sufficient for all current use cases. If a customer needs a different count it can be exposed as an editable field in the review UI. |
+### Python for Packing Slip Parsing
+
+**Decision:** Use Python (`parse_packing_slip.py`) rather than PHP for xlsx parsing.
+
+**Rationale:** PHP's native xlsx support is limited. The Python `openpyxl` ecosystem provides robust, well-maintained xlsx parsing with reliable handling of merged cells, varied column layouts, and multi-sheet workbooks — all of which appear in real customer packing slips.
+
+**Trade-off:** Introduces a `shell_exec()` bridge between PHP and Python. This is the most environment-sensitive part of the stack (see below).
+
+---
+
+### shell_exec() Bridge — Environment Sensitivity
+
+The PHP → Python bridge via `shell_exec()` requires Python to be reachable from the web server process. The PATH available to Apache/XAMPP/nginx often differs from the developer's terminal PATH.
+
+- **Windows 11:** Use the python.org installer with "Add to PATH". The Microsoft Store stub does not work reliably with `shell_exec()`.
+- **macOS:** `python` may point to Python 2. Use `python3`. Homebrew path (`/opt/homebrew/bin/python3`) is typically not in Apache's PATH — hardcode it in `parse_slip.php`.
+- **Linux:** `python3` is usually `/usr/bin/python3`. Confirm the web server user can execute it.
+
+See `CONTRIBUTING.md → Local Dev Environment` for step-by-step debugging.
+
+---
+
+### Logo Embedding in preview.php: base64 \<img\> vs. SVG \<symbol\>/\<use\>
+
+**Decision:** Embed the company logo as a **base64 `<img>` tag on every label**.
+
+| Version | Approach | Result |
+|---|---|---|
+| v1.47 and earlier | Base64 `<img>` per label | ✅ Correct in all browsers and PDF renderers |
+| v1.49 | Single `<symbol>` + `<use>` references | ✅ On-screen only — ❌ logos blank in Chrome PDFs |
+| v1.49 | Base64 `<img>` per label (reverted) | ✅ Correct in all browsers and PDF renderers |
+
+**Why the revert:** Chrome's built-in PDF renderer does not resolve `<symbol>`/`<use>` cross-references when generating PDFs via the browser print dialog. All logos rendered as blank boxes. Since browser-print-to-PDF is the primary output path for this application, the optimisation was reverted.
+
+**Rule:** Do not attempt to re-optimise logo embedding via `<symbol>`/`<use>` in `preview.php`.
+
+---
+
+### Zero-AJAX Autocomplete via Inline JS Constant
+
+**Decision:** Embed `known_parts.json` as an inline JS constant (`KP`) in `index.php` at page load rather than fetching it on demand.
+
+**Rationale:** `known_parts.json` is small enough (~40 KB) to embed inline with negligible impact on page load. Inline embedding eliminates a network round-trip, simplifies the autocomplete implementation, and avoids CORS or path issues.
+
+**Trade-off:** Full payload transferred on every page load. Acceptable at current data size. If the file grows beyond ~500 KB, a lazy-fetch approach should be reconsidered.
+
