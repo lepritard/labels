@@ -1,6 +1,23 @@
 <?php
 // Lake Forest Industries — Warehouse Label Generator
-// index.php v1.47
+// index.php v1.49
+
+// ── known_parts.json loader ──────────────────────────────────────────────
+// Same directory as index.php on server. Embedded as inline JS const KP.
+// Zero AJAX — autocomplete works with no extra server round-trips.
+$kp_path     = __DIR__ . '/known_parts.json';
+$known_parts = [];
+if (file_exists($kp_path)) {
+    $raw = file_get_contents($kp_path);
+    if ($raw !== false) $known_parts = json_decode($raw, true) ?? [];
+}
+$kp_json   = json_encode($known_parts, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);
+$customers = [];
+foreach ($known_parts as $e) {
+    $c = $e['customer'] ?? '';
+    if ($c !== '' && !in_array($c, $customers, true)) $customers[] = $c;
+}
+sort($customers);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,6 +65,8 @@
   .mixed-pallet-section .section-title { border-top: none; padding-top: 0; margin-top: 0; color: #1a4a7a; }
   .hidden { display: none !important; }
   @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-grid.cols-3 { grid-template-columns: 1fr 1fr; } }
+  /* v1.49 autofill indicator */
+  .kp-filled { border-color: #28a745 !important; background: #f0fff4 !important; }
   /* version footer */
   .version-footer {
     position: fixed; bottom: 0; right: 0;
@@ -84,19 +103,31 @@
       <div class="form-grid">
         <div class="form-group">
           <label>Customer Name</label>
-          <input type="text" name="customer" placeholder="e.g. TurboChef" required>
+          <input type="text" id="kp-customer" name="customer" placeholder="e.g. TurboChef"
+                 autocomplete="off" list="kp-customer-list">
+          <datalist id="kp-customer-list">
+            <?php foreach ($customers as $c): ?>
+            <option value="<?= htmlspecialchars($c) ?>">
+            <?php endforeach; ?>
+          </datalist>
         </div>
         <div class="form-group">
-          <label>NA Number (Shipment ID)</label>
-          <input type="text" name="na_number" placeholder="e.g. NA-222610" required>
+          <label>Shipment ID <span style="font-weight:normal;text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <input type="text" name="na_number" placeholder="e.g. NA-222610">
         </div>
         <div class="form-group">
           <label>Part Number</label>
-          <input type="text" name="part_number" placeholder="e.g. ENC-1724" required>
+          <input type="text" id="kp-part" name="part_number" placeholder="e.g. ENC-1724"
+                 autocomplete="off" list="kp-part-list" required>
+          <datalist id="kp-part-list">
+            <?php foreach (array_keys($known_parts) as $pn): ?>
+            <option value="<?= htmlspecialchars($pn) ?>">
+            <?php endforeach; ?>
+          </datalist>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="kp-date-row" style="overflow:hidden;max-height:0;opacity:0;transition:max-height .28s ease,opacity .22s ease;">
           <label>Received Date</label>
-          <input type="date" name="received_date" value="<?php echo date('Y-m-d'); ?>" required>
+          <input type="date" id="kp-received-date" name="received_date" value="<?php echo date('Y-m-d'); ?>">
         </div>
       </div>
 
@@ -108,15 +139,26 @@
         </div>
         <div class="form-group">
           <label>Standard Qty Per Box</label>
-          <input type="number" name="std_qty" min="1" placeholder="e.g. 6" required>
+          <div id="kp-qty-wrap">
+            <input type="number" id="kp-std-qty" name="std_qty" min="1" placeholder="e.g. 6" required>
+          </div>
+          <div id="kp-nonstd-banner" style="display:none;background:#fff8e1;border:1px solid #f9a825;border-radius:3px;padding:8px 12px;margin-top:5px;font-size:11px;line-height:1.5;">
+            <span id="kp-banner-txt"></span>
+            <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" id="kp-btn-yes" style="padding:2px 8px;border-radius:3px;border:1px solid #bbb;font-size:11px;cursor:pointer;background:#fff;">Yes &mdash; add as NON-STD box</button>
+              <button type="button" id="kp-btn-no"  style="padding:2px 8px;border-radius:3px;border:1px solid #bbb;font-size:11px;cursor:pointer;background:#fff;">No &mdash; use as standard</button>
+              <button type="button" id="kp-btn-dim" style="padding:2px 8px;border-radius:3px;border:1px solid #bbb;font-size:11px;cursor:pointer;background:#fff;">Dismiss</button>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label>Label Copies Per Box</label>
           <input type="number" name="copies" min="1" max="10" value="1">
         </div>
         <div class="form-group">
-          <label>Starting Sequence # <span style="font-weight:normal;text-transform:none;letter-spacing:0;">(digits 6–9 of serial tag)</span></label>
-          <input type="number" name="seq_start" min="1" max="9999" value="1" placeholder="e.g. 1">
+          <label>Starting Sequence #</label>
+          <input type="number" id="kp-seq-start" name="seq_start" min="0" max="9999" value="0">
+          <span class="note" style="margin-top:3px;">Enter a starting number to include serial tags &amp; received date on labels.</span>
         </div>
       </div>
 
@@ -152,8 +194,8 @@
           <input type="text" name="customer" placeholder="e.g. Avtron Power Solutions" required>
         </div>
         <div class="form-group">
-          <label>NA Number (Shipment ID)</label>
-          <input type="text" name="na_number" placeholder="e.g. NA-222610" required>
+          <label>Shipment ID <span style="font-weight:normal;text-transform:none;letter-spacing:0;">(optional)</span></label>
+          <input type="text" name="na_number" placeholder="e.g. NA-222610">
         </div>
         <div class="form-group">
           <label>Received Date</label>
@@ -345,7 +387,96 @@ function buildNonstdParams() {
 
 // Initialize with one empty non-standard row on page load
 addNonstdRow();
+
+  // ── v1.49 known-parts autocomplete ─────────────────────────────────────
+  (function(){
+    var KP = <?php echo $kp_json; ?>;
+    function e(id){return document.getElementById(id);}
+    function filled(el,yes){if(el){el.classList.toggle('kp-filled',yes);}}
+    var custEl=e('kp-customer'), partEl=e('kp-part'), partList=e('kp-part-list');
+    var seqEl=e('kp-seq-start'), dateRow=e('kp-date-row'), dateEl=e('kp-received-date');
+
+    function rebuildParts(cust){
+      if(!partList)return;
+      partList.innerHTML='';
+      Object.keys(KP).forEach(function(pn){
+        if(!cust||KP[pn].customer===cust){
+          var o=document.createElement('option');o.value=pn;partList.appendChild(o);
+        }
+      });
+    }
+
+    function applyQty(){
+      var wrap=e('kp-qty-wrap'); if(!wrap)return;
+      var old=e('kp-qty-sel'); if(old)old.remove();
+      var inp=e('kp-std-qty'); if(!inp)return;
+      inp.style.display=''; filled(inp,false);
+      var pn=(partEl?partEl.value:'').trim();
+      var entry=KP[pn]; if(!entry||!entry.std_qtys||!entry.std_qtys.length)return;
+      var qtys=entry.std_qtys;
+      if(qtys.length===1){inp.value=qtys[0];filled(inp,true);hideBanner();return;}
+      inp.style.display='none';
+      var sel=document.createElement('select');
+      sel.id='kp-qty-sel';sel.name='std_qty';
+      sel.style.cssText='width:100%;padding:7px 10px;border:1px solid #aaa;border-radius:3px;font-size:13px;font-family:Arial,sans-serif;';
+      qtys.forEach(function(q){var o=document.createElement('option');o.value=q;o.textContent=q;sel.appendChild(o);});
+      var oth=document.createElement('option');oth.value='__other__';oth.textContent='Other\u2026';sel.appendChild(oth);
+      sel.addEventListener('change',function(){
+        if(sel.value==='__other__'){sel.remove();inp.style.display='';inp.value='';inp.focus();}
+      });
+      wrap.insertBefore(sel,e('kp-nonstd-banner'));filled(sel,true);hideBanner();
+    }
+
+    function hideBanner(){var b=e('kp-nonstd-banner');if(b)b.style.display='none';}
+    function checkNonstd(){
+      var pn=(partEl?partEl.value:'').trim(), entry=KP[pn];
+      if(!entry||!entry.std_qtys||!entry.std_qtys.length){hideBanner();return;}
+      var inp=e('kp-std-qty'); if(!inp||inp.style.display==='none')return;
+      var val=parseInt(inp.value,10);
+      if(!val||entry.std_qtys.indexOf(val)!==-1){hideBanner();return;}
+      var bt=e('kp-banner-txt');
+      if(bt)bt.textContent=(pn||'This part')+' normally ships '+entry.std_qtys.join(' or ')+' pcs/box. This quantity ('+val+') differs \u2014 is this a non-standard box?';
+      var b=e('kp-nonstd-banner');if(b)b.style.display='block';
+    }
+
+    function syncDate(){
+      if(!seqEl||!dateRow)return;
+      var v=parseInt(seqEl.value,10), show=(!isNaN(v)&&v>=1);
+      dateRow.style.maxHeight=show?'70px':'0';
+      dateRow.style.opacity=show?'1':'0';
+      if(dateEl)dateEl.required=show;
+    }
+
+    if(custEl){
+      custEl.addEventListener('input',function(){rebuildParts(custEl.value.trim());applyQty();});
+    }
+    if(partEl){
+      partEl.addEventListener('input',function(){
+        var pn=partEl.value.trim(), entry=KP[pn];
+        if(entry&&custEl&&!custEl.value.trim()){custEl.value=entry.customer;filled(custEl,true);rebuildParts(entry.customer);}
+        applyQty();
+      });
+    }
+    var qi=e('kp-std-qty');
+    if(qi){qi.addEventListener('change',checkNonstd);qi.addEventListener('blur',checkNonstd);}
+
+    var btnY=e('kp-btn-yes'),btnN=e('kp-btn-no'),btnD=e('kp-btn-dim');
+    if(btnY)btnY.addEventListener('click',function(){
+      var pn=(partEl?partEl.value:'').trim(), entry=KP[pn];
+      var inp=e('kp-std-qty'), val=parseInt((inp||{}).value,10);
+      hideBanner();
+      if(entry&&entry.std_qtys.length&&inp)inp.value=entry.std_qtys[0];
+      // Trigger the existing addRow mechanism for non-std boxes
+      if(typeof addNonstdRow==='function')addNonstdRow();
+    });
+    if(btnN)btnN.addEventListener('click',hideBanner);
+    if(btnD)btnD.addEventListener('click',hideBanner);
+
+    if(seqEl)seqEl.addEventListener('input',syncDate);
+    syncDate();
+  })();
+
 </script>
-  <div class="version-footer">LF Label Generator&nbsp;v1.47 &middot; index</div>
+  <div class="version-footer">LF Label Generator&nbsp;v1.49.3 &middot; index</div>
 </body>
 </html>
